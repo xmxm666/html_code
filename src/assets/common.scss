@@ -1,0 +1,172 @@
+//$themeColor:var(--mainColor);
+// $themeColor:red;
+@function getFullAssetPath($name) {
+  $assetPath: "http://static.shanjiezhifu.com/zhihong/";
+  @return url("#{$assetPath+$name}");
+}
+
+/*文本格式化，超出范围，显示省略号*/
+/*默认一行内超出换行，可以传行数*/
+@mixin t-overflow($line:1) {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  //解决安卓会把文字隐藏掉的BUG
+  @if $line == 1 {
+    white-space: nowrap;
+    padding-top: 1Px;
+    padding-bottom: 1Px;
+  } @else {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $line;
+    word-break: break-all;
+  }
+}
+
+/* 清除浮动 */
+@mixin clearfix {
+  &:after {
+    clear: both;
+    content: '.';
+    display: block;
+    height: 0;
+    line-height: 0;
+    overflow: hidden;
+  }
+  *height: 1%;
+}
+
+/*弹性盒子居中（传入null不设置该属性）*/
+@mixin flex-center($direction:row,$justify:center,$align:center,$flex-wrap: null) {
+  display: -webkit-flex;
+  display: flex;
+  @if ($direction!=null) {
+    flex-direction: $direction;
+  }
+  @if ($justify!=null) {
+    justify-content: $justify;
+  }
+  @if ($align!=null) {
+    align-items: $align;
+  }
+  @if ($flex-wrap != null) {
+    flex-wrap: $flex-wrap;
+  }
+}
+
+@mixin flex-between {
+  @include flex-center($justify: space-between);
+}
+
+@mixin alignCenter {
+  @include flex-center($justify: null);
+}
+
+/*绝对定位  参数顺序：上右下左*/
+@mixin positionAbsolute($top:null,$right:null,$bottom:null,$left:null) {
+  position: absolute;
+  @if ($left!="" & & $left!=null) {
+    left: $left;
+  }
+  @if ($right!="" & & $right!=null) {
+    right: $right;
+  }
+  @if ($top!="" & & $top!=null) {
+    top: $top;
+  }
+  @if ($bottom!="" & & $bottom!=null) {
+    bottom: $bottom;
+  }
+}
+
+/*铺满*/
+@mixin absoluteFull($position:absolute) {
+  @include positionAbsolute(0, 0, 0, 0);
+  position: $position;
+}
+
+/*居中*/
+@mixin absoluteCenter($position:absolute) {
+  @include positionAbsolute(50%, auto, auto, 50%);
+  transform: translate(-50%,-50%);
+  position: $position;
+}
+
+/*渐变(从上到下）*/
+@mixin linear-gradient($direction:bottom,$color1:transparent,$color2:#306eff,$color3:transparent) {
+  //background: -webkit-linear-gradient($direction,$colorTop, $colorCenter, $colorBottom); /* Safari 5.1 - 6.0 */
+  background: -o-linear-gradient($direction, $color1, $color2, $color3); /* Opera 11.1 - 12.0 */
+  background: -moz-linear-gradient($direction, $color1, $color2, $color3); /* Firefox 3.6 - 15 */
+  background: linear-gradient(to $direction, $color1, $color2, $color3); /* 标准的语法 */
+}
+
+/* 行高 */
+@mixin line-height($height:30px,$line-height:30px) {
+  @if ($height != null) {
+    height: $height;
+  }
+  @if ($line-height!=null) {
+    line-height: $line-height;
+  }
+}
+
+/* 画三角形 */
+@mixin triangle($width:10px,$direction:top,$color:$bgBlueLight) {
+  border: $width solid transparent;
+  @if ($direction == top) { // 上三角
+    border-bottom-color: $color;
+  }
+  @if ($direction == bottom) { // 下三角
+    border-top-color: $color;
+  }
+  @if ($direction == left) { // 左三角
+    border-right-color: $color;
+  }
+  @if ($direction == right) { // 右三角
+    border-left-color: $color;
+  }
+}
+
+/* 定义滚动条样式 圆角和阴影不需要则传入null */
+@mixin scrollBar($width:10px,$height:10px,$outColor:$bgColor,$innerColor:$bgGrey,$radius:5px,$shadow:null) {
+  /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $height;
+    background-color: $outColor;
+  }
+
+  /*定义滚动条轨道 内阴影+圆角*/
+  &::-webkit-scrollbar-track {
+    @if ($shadow!=null) {
+      -webkit-box-shadow: $shadow;
+    }
+    @if ($radius!=null) {
+      border-radius: $radius;
+    }
+    background-color: $outColor;
+  }
+
+  /*定义滑块 内阴影+圆角*/
+  &::-webkit-scrollbar-thumb {
+    @if ($shadow!=null) {
+      -webkit-box-shadow: $shadow;
+    }
+    @if ($radius!=null) {
+      border-radius: $radius;
+    }
+    background-color: $innerColor;
+    border: 1PX solid $innerColor;
+  }
+}
+
+/* 圆形盒子 */
+@mixin circle($size: 11px,$bg: #fff) {
+  border-radius: 50%;
+  width: $size;
+  height: $size;
+  line-height: $size;
+  text-align: center;
+  background: $bg;
+}

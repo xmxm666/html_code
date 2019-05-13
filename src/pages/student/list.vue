@@ -6,15 +6,13 @@
           添加学员
         </el-button>
       </div>
-      <el-select size="small" v-model="searchForm.schoolId" placeholder="请选择学校">
-        <el-option
-          v-for="item in schoolData"
-          :key="item.schoolId"
-          :label="item.schoolName"
-          :value="item.schoolId">
-        </el-option>
+       <el-select size="small" v-model="searchForm.checkin" placeholder="请选择状态">
+        <el-option label="全部" :value="null"></el-option>
+        <el-option label="未审核" :value="1"></el-option>
+        <el-option label="已通过" :value="0"></el-option>
       </el-select>
-      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
+      <selectSchool :disabled='disabled' ></selectSchool>  
+      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -35,7 +33,7 @@
         <el-table-column
           label="ID"
           align="center"
-          prop="courseId"
+          prop="userId"
           width="100">
         </el-table-column>
          <el-table-column
@@ -44,14 +42,14 @@
           prop="courseId"
           width="100">
            <template slot-scope="scope">
-            <img-wrapper size="medium" :src="assetPath+scope.row.image" style="{width:50px;height:50px;}"/>
+            <img-wrapper size="medium" :src="ImgPath+scope.row.image" style="{width:50px;height:50px;}"/>
           </template>
         </el-table-column>
         <el-table-column
           prop="userName"
           label="用户名称"
           align="center"
-          width="100">
+         >
         </el-table-column>
          <el-table-column
           prop="phone"
@@ -91,21 +89,31 @@
           align="center"
           width="100">
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.invalid?`danger`:`success`">{{scope.row.invalid?`失效`:`正常`}}</el-tag>
+            <el-tag size="medium" :type="scope.row.checkin===1?`info`:`success`">{{scope.row.checkin===1?`待审核`:`正常`}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="快捷操作"
                          width="200"
                          align="center">
           <template slot-scope="scope">
+                <el-button
+              size="mini"
+              type="success"
+              @click="passBtn(scope.$index, scope.row)" v-if='scope.row.checkin===1'>通过
+            </el-button>
+                <el-button
+              size="mini"
+              type="danger"
+              @click="carouselMapInvalid(scope.$index, scope.row)" v-if='scope.row.checkin===1'>拒绝
+            </el-button>
             <el-button
               size="mini"
-              @click="carouselMapEdit(scope.$index, scope.row)">编辑
+              @click="carouselMapEdit(scope.$index, scope.row)" v-if='scope.row.checkin!==1'>编辑
             </el-button>
             <el-button
               size="mini"
               type="danger"
-              @click="carouselMapInvalid(scope.$index, scope.row)">删除
+              @click="carouselMapInvalid(scope.$index, scope.row)" v-if='scope.row.checkin!==1'>删除
             </el-button>
           </template>
         </el-table-column>
@@ -122,7 +130,7 @@
         </el-pagination>
       </div>
     </body-container>
-  
+
   </div>
 
 </template>
@@ -132,19 +140,21 @@
   import HeaderBar from "../../components/header-bar";
   import imgWrapper from "../../components/img-wrapper";
   import BodyContainer from "../../components/body-container";
-  import {excludeEmpty} from "../../utils";
+  import {excludeEmpty,getBool} from "../../utils";
   import RegionSelect from "../../components/region-select";
-  import {assetPath} from '../../project-config/base';
+  import {ImgPath} from '../../project-config/base';
+  import selectSchool from "../../components/select-school";
 
   export default {
     name: "CarouselMapList",
-    components: {RegionSelect, BodyContainer, HeaderBar,imgWrapper},
+    components: {RegionSelect, BodyContainer, HeaderBar,imgWrapper,selectSchool},
     data() {
       return {
-        assetPath,
+        ImgPath,
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
+        disabled:false,
         loading: false,
         multipleSelection: [],
         categories: [],
@@ -157,6 +167,7 @@
         //默认搜索条件
         searchForm: {
           schoolId: null,
+          checkin:null,
         },
       }
     },
@@ -165,7 +176,7 @@
         this.imageDialogImageUrl = url;
         this.imageDialogVisible = true;
       },
-      ...mapActions("student", ['getStudentList','deleteLesson']),
+      ...mapActions("student", ['getStudentList','deleteStudent','passStudent']),
       ...mapActions('common',['getSchoolList']),
       isPriceReduction(specifications) {
         return specifications.some((s) => s["isPriceReduction"]);
@@ -177,19 +188,50 @@
           ...this.searchForm,
           pageNum,
           pageSize,
+            schoolId:localStorage.getItem('schoolId')
         });
         this.loading = false;
         return res;
       },
       carouselMapEdit(index, row) {
-        this.$router.push({path: `/page/lesson/add`, query: {courseId: row.courseId}})
+        this.$router.push({path: `/student/add`, query: {userId: row.userId,schoolId:row.schoolId}})
+      },
+     async passBtn(index, row){
+       const {code,msg} = await this.passStudent({
+          checkin:0,
+          userId:row.userId
+        })
+        if(code==='200'){
+           this.$message({
+          message: '操作成功',
+          type: 'success'
+        });
+          this.getTableData(this.pageNum, this.pageSize);
+        }else{
+          this.$message.error(msg);
+        }
+      },
+      async refuseBtn(index, row){
+       const {code,msg} = await this.passStudent({
+          checkin:2,
+          userId:row.userId
+        })
+        if(code==='200'){
+           this.$message({
+          message: '操作成功',
+          type: 'success'
+        });
+          this.getTableData(this.pageNum, this.pageSize);
+        }else{
+          this.$message.error(msg);
+        }
       },
       carouselMapInvalid(index, row) {
-        this.$confirm('确认删除该课程？')
+        this.$confirm('确认删除该学生？')
           .then(async () => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏
-            const {code} = await this.deleteLesson({
-              courseId: row.courseId,
+            const {code} = await this.deleteStudent({
+              userItemId: row.userItemId,
             });
             if (code === '200') {
               this.$message.success("删除成功!");
@@ -219,7 +261,7 @@
         tableTotal: state => state.studentList.total|| 0
       }),
       ...mapState("common", {
-        schoolData: state => state.schoolList.list||[],
+        schoolData: state => state.schoolList||[],
       }),
       ...mapState("platform", {
         appPages: s => s.appPages
@@ -227,8 +269,10 @@
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
-      this.getTableData(this.pageNum, this.pageSize);
-        await this.getSchoolList();
+      await this.getTableData(this.pageNum, this.pageSize);
+         if(getBool()){
+          this.disabled=true;
+        }
     }
   }
 </script>

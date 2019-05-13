@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Index from '@/pages/index'
 import {homeRouter} from "./home";
 import {lessonRouter} from "./lesson";
-import {teacherRouter} from "./teacher";
+import {teacherRouter,adminRouter} from "./teacher";
 import {schoolRouter} from "./school";
 import 'nprogress/nprogress.css'
 import NProgress from 'nprogress'
@@ -30,7 +30,8 @@ const router = new Router({
         schoolRouter,
         orderRouter,
         studentRouter,
-        
+        adminRouter
+
       ]
     }
   ]
@@ -42,7 +43,7 @@ router.beforeEach((to, form, next) => {
   if (to.meta.title) {
     document.title = to.meta.title
   }
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const isNotAllowPath = allowPath.every(path => path !== to.path);
   //未登录的情况
   if (!token && isNotAllowPath) {

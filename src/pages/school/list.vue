@@ -2,26 +2,19 @@
   <div id="List">
     <header-bar legend="学校列表">
         <div slot="left">
-        <el-button type="primary" size="small" style="margin-left: 20px" @click="$pushRoute('/school/add')">
+        <el-button type="primary" size="small" v-if="!disabled" style="margin-left: 20px" @click="$pushRoute('/school/add')">
           添加学校
         </el-button>
       </div>
-         <el-select size="small" v-model="searchForm.schoolId" placeholder="请选择学校">
-        <el-option
-          v-for="item in schoolData"
-          :key="item.schoolId"
-          :label="item.schoolName"
-          :value="item.schoolId">
-        </el-option>
-      </el-select>
-      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
+        <selectSchool :disabled='disabled' ></selectSchool> 
+      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
       <el-table
         stripe
         ref="multipleTable"
-        :data="formatTableData"
+        :data="tableData"
         tooltip-effect="dark"
         border
         v-loading="loading"
@@ -32,7 +25,7 @@
           prop="schoolId"
           label="ID"
           width="80"/>
-    
+
         <el-table-column
           label="学校名称"
           align="center"
@@ -49,10 +42,10 @@
           </template>
         </el-table-column>
         <el-table-column
-        
+
           label="纬度"
           align="center"
-          
+
           >
           <template slot-scope="scope">
              {{scope.row.longitude}}
@@ -60,15 +53,15 @@
         </el-table-column>
         <el-table-column
           label="状态"
-        
+
           align="center">
           <template slot-scope="scope">
             <el-tag size="medium" :type="scope.row.isUsing!==1?`danger`:`success`">{{scope.row.invalid?`冻结`:`正常`}}</el-tag>
           </template>
         </el-table-column>
-  
+
         <el-table-column label="快捷操作"
-                      
+
                          align="center">
           <template slot-scope="scope">
             <el-button
@@ -80,11 +73,11 @@
               type="danger"
               @click="tableDataInvalid(scope.$index, scope.row)">删除
             </el-button>
-            <el-button
+            <!-- <el-button
               size="mini"
               :type="scope.row.invalid?`primary`:`info`"
               @click="tableDataUpData(scope.$index, scope.row)">{{scope.row.invalid?`启用`:`停用`}}
-            </el-button>
+            </el-button> -->
           </template>
         </el-table-column>
       </el-table>
@@ -111,26 +104,27 @@
   import {mapActions, mapState, mapGetters} from 'vuex'
   import HeaderBar from "../../components/header-bar";
   import BodyContainer from "../../components/body-container";
-  import {excludeEmpty} from "../../utils";
+  import {excludeEmpty,getBool} from "../../utils";
   import RegionSelect from "../../components/region-select";
+  import selectSchool from "../../components/select-school";
 
   export default {
     name: "List",
-    components: {RegionSelect, BodyContainer, HeaderBar},
+    components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
         dialogFormVisible:false,
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
+        disabled:false,
         loading: false,
         pageNum: 1,
         pageSize: 10,
-     
+
         //默认搜索条件
         searchForm: {
           appPageId: null,
-          selectedAddress: [],
         },
       }
     },
@@ -140,11 +134,10 @@
 
       async getTableData(pageNum, pageSize) {
         this.loading = true;
-        const form = {...this.searchForm, city: this.searchForm.selectedAddress[1]};
-        const condition = excludeEmpty(form);
         const res = await this.getSchoolList({
           pageNum,
           pageSize,
+          schoolId:localStorage.getItem('schoolId')
         });
         this.loading = false;
         return res;
@@ -200,25 +193,14 @@
         tableData: state => state.schoolList.list || [],
         tableDataTotal: state => state.schoolList.total||0,
       }),
-      formatTableData() {
-        console.log(this.tableData)
-        return this.tableData.map((item) => ({
-          ...item,
-          customerCertification: item.customerCertification || {}
-        }))
-      },
-       ...mapState("common", {
-        schoolData: state => state.schoolList.list||[],
-      }),
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
       this.getTableData(this.pageNum, this.pageSize);
-      if(this.schoolData){
 
-      }else {
-        await this.getSchoolList();
-      }
+       if(getBool()){
+          this.disabled=true;
+        }
     }
   }
 </script>

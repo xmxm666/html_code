@@ -5,10 +5,11 @@
       id="quill-upload"
       style="display: none"
       class="avatar-uploader"
-      :action="`${backendBasePath}/fileUpload`"
+      :action="`${backendBasePath}/pic/uploadSchoolImages`"
       :show-file-list="false"
       :on-success="uploadSuccess"
       :on-error="uploadError"
+      name='file'
       :before-upload="beforeUpload">
     </el-upload>
     <quill-editor v-loading="quillUpdateImg" v-model="content"
@@ -71,11 +72,11 @@
         // 获取富文本组件实例
         let quill = this.$refs.myQuillEditor.quill
         // 如果上传成功
-        if (res.code === 200) {
+        if (res.code === '200') {
           // 获取光标所在位置
           let length = quill.getSelection().index;
           // 插入图片  res.info为服务器返回的图片地址
-          quill.insertEmbed(length, 'image', this.getPathByAssetPath(res.data[0]))
+          quill.insertEmbed(length, 'image', this.getPathByAssetPath(res.url))
           // 调整光标到最后
           quill.setSelection(length + 1)
         } else {

@@ -6,15 +6,9 @@
           添加校园介绍
         </el-button>
       </div>
-      <el-select size="small" v-model="searchForm.schoolId" placeholder="请选择学校">
-        <el-option
-          v-for="item in schoolData"
-          :key="item.schoolId"
-          :label="item.schoolName"
-          :value="item.schoolId">
-        </el-option>
-      </el-select>
-      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
+                <selectSchool :disabled='disabled' ></selectSchool>  
+
+      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -29,7 +23,7 @@
         style="width: 100%">
         <el-table-column
           align="center"
-          prop="schoolId"
+          prop="id"
           label="ID"
           width="80"/>
 
@@ -74,7 +68,7 @@
 
           align="center">
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.isUsing!==1?`success`:`danger`">{{scope.row.invalid?`异常`:`正常`}}</el-tag>
+           <el-tag size="medium" :type="scope.row.istop!=='1'?`success`:`success`">{{scope.row.istop!=='1'?`正常`:`置顶`}}</el-tag>
           </template>
         </el-table-column>
 
@@ -118,12 +112,13 @@
   import {mapActions, mapState, mapGetters} from 'vuex'
   import HeaderBar from "../../../components/header-bar";
   import BodyContainer from "../../../components/body-container";
-  import {excludeEmpty} from "../../../utils";
+  import {excludeEmpty,getBool} from "../../../utils";
   import RegionSelect from "../../../components/region-select";
+  import selectSchool from "../../../components/select-school";
 
   export default {
     name: "List",
-    components: {RegionSelect, BodyContainer, HeaderBar},
+    components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
         table:[],
@@ -132,6 +127,7 @@
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
+        disabled:false,
         loading: false,
         pageNum: 1,
         pageSize: 10,
@@ -152,10 +148,11 @@
           pageNum,
           pageSize,
           type:'3',
-					...this.searchForm
+          ...this.searchForm,
+           schoolId:localStorage.getItem('schoolId')
         });
         this.table=res.data.list;
-        this.total=res.total;
+        this.total=res.data.total;
         this.loading = false;
       },
       //详情
@@ -194,17 +191,16 @@
     },
     computed: {
       ...mapState("common", {
-        schoolData: state => state.schoolList.list||[],
+        schoolData: state => state.schoolList||[],
       }),
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
       this.getTableData(this.pageNum, this.pageSize);
-      if(this.schoolData){
+        if(getBool()){
+          this.disabled=true;
+        }
 
-      }else {
-        await this.getSchoolList();
-      }
     }
   }
 </script>

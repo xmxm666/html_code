@@ -1,33 +1,15 @@
-export const EDUCATIONS = [{
-  id: 1,
-  name: "大专"
-}, {
-  id: 2,
-  name: "大学"
-}, {
-  id: 3,
-  name: "中专"
-},];
-export const WELFARE_TAG = [{
-  id: 1,
-  name: "五险一金"
-}, {
-  id: 2,
-  name: "车补"
-}, {
-  id: 3,
-  name: "包吃包住"
-},];
-export const FEATURE_TAG = [{
-  id: 1,
-  name: "好看"
-}, {
-  id: 2,
-  name: "帅气"
-}, {
-  id: 3,
-  name: "多金"
-},];
+//政治面貌
+export const politicalStatusColumns=['党员','群众'];
+
+//文化程度
+export const educationalLevelColumns=['小学','初中','高中','大学'];
+
+//退休状态
+export const retirementStatusColumns=['未退休','已退休'];
+
+//学员分类
+export const studentClassificationColumns=['教师','本单位职工','本单位职工家属','本社区居民','其他','管理员'];
+
 
 export const WEEK =[
   {text:'星期一',value:11},

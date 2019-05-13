@@ -10,13 +10,11 @@
         </li>
     </ul>
     <ul class="c-slider-sub" v-show="subMenuConfig.length">
-      <transition-group appear enter-active-class="animated fadeInRight" tag="ul">
         <li class="c-slider-sub__item" @click="subClickHandle(item,key)" :class="{'is-active':subActiveIndex === key}"
             v-for="(item,key) in subMenuConfig " :key="item.legend">
           <em>{{item.legend}}</em>
           <i class="c-slider-sub__icon el-icon-arrow-right"></i>
         </li>
-      </transition-group>
     </ul>
   </section>
 </template>

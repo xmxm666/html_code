@@ -4,7 +4,8 @@ export default {
   namespaced: true,
   state: {
     schoolList: {},
-    teacherList:[]
+    teacherList:[],
+    adminList:[]
   },
   mutations: {
     SET_SCHOOL_LIST(state, data) {
@@ -12,6 +13,9 @@ export default {
     },
     SET_TEACHER_LIST(state, data) {
       state.teacherList = data;
+    },
+    SET_ADMIN_LIST(state, data) {
+      state.adminList = data;
     },
   },
   actions: {
@@ -28,10 +32,17 @@ export default {
      * 教师列表
      */
     async getTeacherList({commit}, params) {
-      const {data} = await requestByPost("server/admin/teacherList", {
+      const {data} = await requestByPost("server/admin/adminList", {
         ...params,
       });
       commit("SET_TEACHER_LIST", data);
+    },
+    //管理员列表
+    async getAdminList({commit}, params) {
+      const {data} = await requestByPost("server/admin/adminList", {
+        ...params,
+      });
+      commit("SET_ADMIN_LIST", data);
     },
     addOrUpdateCarouselMap({commit}, params) {
       return requestByPost("advertisement/createOrUpdateAd", {
@@ -58,5 +69,12 @@ export default {
       });
       commit("SET_CAROUSEL_MAP_LIST", data);
     },
+    // 前端 登出
+    FedLogOut({ commit }) {
+      return new Promise(resolve => {
+        localStorage.removeItem('token');
+        resolve()
+      })
+    }
   },
 }

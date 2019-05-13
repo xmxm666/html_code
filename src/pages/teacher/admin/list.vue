@@ -1,13 +1,12 @@
 <template>
   <div id="List">
-    <header-bar legend="通知列表">
+    <header-bar legend="管理员列表">
       <div slot="left">
-        <el-button type="primary" size="small" style="margin-left: 20px" @click="$pushRoute('/school/legal/add')">
-          添加通知
+        <el-button type="primary" size="small"  style="margin-left: 20px" @click="$pushRoute('/admin/add')">
+          添加管理员
         </el-button>
       </div>
-           <selectSchool :disabled='disabled' ></selectSchool>  
-
+      <selectSchool :disabled='disabled' ></selectSchool>    
       <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
@@ -15,67 +14,62 @@
       <el-table
         stripe
         ref="multipleTable"
-        :data="table"
+        :data="tableData"
         tooltip-effect="dark"
         border
         v-loading="loading"
         height="600px"
         style="width: 100%">
         <el-table-column
-          align="center"
-          prop="id"
           label="ID"
-          width="80"/>
-
+          align="center"
+          prop="adminId"
+          show-overflow-tooltip
+          width="120">
+        </el-table-column>
         <el-table-column
-          label="学校名称"
+          label="姓名"
+          align="center"
+          prop="name"
+          show-overflow-tooltip
+         >
+        </el-table-column>
+        <el-table-column
+          prop="phone"
+          label="手机号"
+          align="center"
+          width="200">
+        </el-table-column>
+        <el-table-column
+          label="单位"
           align="center"
           prop="schoolName"
-        >
-        </el-table-column>
-
-        <el-table-column
           show-overflow-tooltip
-          label="标题"
-          align="center"
-        >
-          <template slot-scope="scope">
-            {{scope.row.title}}
-          </template>
+          >
         </el-table-column>
-        <el-table-column
-          show-overflow-tooltip
-          label="正文"
-          align="center"
-
-        >
-          <template slot-scope="scope">
-            {{scope.row.content}}
-          </template>
-        </el-table-column>
-        <el-table-column
-
-          label="创建时间"
-          align="center"
-
-        >
-          <template slot-scope="scope">
-            {{scope.row.updatetime}}
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="状态"
-
+        <!-- <el-table-column
+          label="审核状态"
           align="center">
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.istop!=='1'?`success`:`success`">{{scope.row.istop!=='1'?`正常`:`置顶`}}</el-tag>
+            <el-tag size="medium" :type="scope.row.status?`success`:`info`">{{scope.row.status?`通过`:`待审核`}}</el-tag>
           </template>
-        </el-table-column>
-
+        </el-table-column> -->
         <el-table-column label="快捷操作"
 
                          align="center">
           <template slot-scope="scope">
+            <el-button
+              size="mini"
+               type='success'
+              v-if="scope.row.status===0"
+              @click="tableDataPass(scope.$index, scope.row)">通过
+            </el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              v-if="scope.row.status===0"
+              @click="tableDataRefuse(scope.$index, scope.row)">拒绝
+            </el-button>
             <el-button
               size="mini"
               @click="tableDataEdit(scope.$index, scope.row)">编辑
@@ -85,7 +79,6 @@
               type="danger"
               @click="tableDataInvalid(scope.$index, scope.row)">删除
             </el-button>
-
           </template>
         </el-table-column>
       </el-table>
@@ -97,13 +90,13 @@
           :page-sizes="pageSizeOption"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total">
+          :total="tableTotal">
         </el-pagination>
       </div>
     </body-container>
-    <!-- <el-dialog :visible.sync="imageDialogVisible">
+    <el-dialog :visible.sync="imageDialogVisible">
       <img width="100%" :src="imageDialogImageUrl" alt="我是一张图片">
-    </el-dialog> -->
+    </el-dialog>
   </div>
 
 </template>
@@ -115,95 +108,105 @@
   import {excludeEmpty,getBool} from "../../../utils";
   import RegionSelect from "../../../components/region-select";
   import selectSchool from "../../../components/select-school";
+  
 
   export default {
     name: "List",
     components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
-        table:[],
-        total:null,
-        dialogFormVisible:false,
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
-        disabled:false,
         loading: false,
+        multipleSelection: [],
+        categories: [],
         pageNum: 1,
+        disabled:false,
         pageSize: 10,
-
+        pieChart: null,
+        barChart: null,
+        //根据是否失效来切换按钮
+        featureBtnState: 0,
         //默认搜索条件
         searchForm: {
-          schoolId: null,
-          selectedAddress: [],
+          role:1,
         },
       }
     },
     methods: {
-      ...mapActions("common", ['getSchoolList', 'getTeacherList','updateUserMoney','freezeCustomer']),
-      ...mapActions("school", ['deleteArticle','getSchoolNoticeList']),
+      ...mapActions("common", ['getTeacherList','getSchoolList']),
+      ...mapActions("teacher", ['deleteTeacher']),
 
       async getTableData(pageNum, pageSize) {
+        console.log(this.searchForm)
         this.loading = true;
-				const condition = excludeEmpty(this.searchForm);
-        const res = await this.getSchoolNoticeList({
+        const res = await this.getTeacherList({
+          ...this.searchForm,
           pageNum,
           pageSize,
-          type:'1',
-          ...condition,
-           schoolId:localStorage.getItem('schoolId')
+          schoolId:localStorage.getItem('schoolId')
         });
-        this.table=res.data.list;
-        this.total=res.data.total;
         this.loading = false;
+        return res;
       },
-      //详情
+      tableDataPass(){
+        console.log('该功能未完善')
+      },
+      tableDataRefuse(){
+        console.log('该功能未完善')
+      },
       tableDataEdit(index, row) {
-        this.$router.push({path: `/school/legal/add`, query: {id: row.id}})
+        this.$router.push({path: `/admin/add`, query: {id: row.adminId}})
       },
-      //删除
       tableDataInvalid(index, row) {
-        this.$confirm('确认删除该条通知？')
-          .then( async () => {
+        this.$confirm('确认删除该管理员？')
+          .then(async _ => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏
-            const {code} = await this.deleteArticle({
-              id: row.id
+            const {code} = await this.deleteTeacher({
+              adminId: row.adminId
             });
-            if (code === '200') {
+            if (+code === 200) {
               this.$message.success("删除成功!");
               this.getTableData(this.pageNum, this.pageSize);
             } else {
               this.$message.error("删除失败,请联系开发人员检查!");
             }
           })
-          .catch(() => {
+          .catch(_ => {
             this.$message("操作已取消");
           });
       },
-      //一页多少个
       pageSizeChange(size) {
         this.pageSize = size;
         this.getTableData(this.pageNum, this.pageSize);
       },
-      //第几页
       pageNumChange(num) {
         this.pageNum = num;
         this.getTableData(this.pageNum, this.pageSize);
       },
+
     },
     computed: {
       ...mapState("common", {
+        tableData: state => state.teacherList.list||[],
+        tableTotal: state => state.teacherList.total|| 0
+      }),
+      ...mapState("common", {
         schoolData: state => state.schoolList||[],
+      }),
+      ...mapState("platform", {
+        appPages: s => s.appPages
       }),
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
-      this.getTableData(this.pageNum, this.pageSize);
-        if(getBool()){
+     await this.getTableData(this.pageNum, this.pageSize);
+         if(getBool()){
           this.disabled=true;
+          this.searchForm.schoolId=localStorage.getItem('schoolName');
         }
-      }
-
+    }
   }
 </script>
 
@@ -212,9 +215,6 @@
     .c-form-pagination {
       text-align: center;
       margin-top: 30px;
-    }
-    .balance{
-      cursor: pointer;
     }
   }
 </style>

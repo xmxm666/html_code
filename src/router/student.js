@@ -25,8 +25,14 @@ export const studentRouter = {
           {
             path: 'leaveList',
             meta:{title:'请假列表'},
-            name: 'StudentList',
+            name: 'LeaveList',
             component:  () => import('@/pages/student/leave-list'),
+          },
+          {
+            path: 'logoutList',
+            meta:{title:'审核列表'},
+            name: 'LogoutList',
+            component:  () => import('@/pages/student/logout-list'),
           },
         ]
       }

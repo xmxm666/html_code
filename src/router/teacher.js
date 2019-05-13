@@ -25,3 +25,25 @@ export const teacherRouter = {
 
 };
 
+
+export const adminRouter = {
+  meta: {title: "概览"},
+  path: 'admin',
+  component: () => import('@/pages/teacher/container'),
+  children: [
+   
+        {
+          path: 'add',
+          name: 'adminManageAdd',
+          component:  () => import('@/pages/teacher/admin/add'),
+        }, {
+          path: 'list',
+          name: 'adminManageList',
+          component: () => import('@/pages/teacher/admin/list'),
+        },
+      ],
+
+};
+
+
+

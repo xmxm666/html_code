@@ -2,17 +2,10 @@
   <div id="CarouselMapList">
     <header-bar legend="请假列表">
       <div slot="left">
-        
+
       </div>
-      <el-select size="small" v-model="searchForm.schoolId" placeholder="请选择学校">
-        <el-option
-          v-for="item in schoolData"
-          :key="item.schoolId"
-          :label="item.schoolName"
-          :value="item.schoolId">
-        </el-option>
-      </el-select>
-      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
+      <selectSchool :disabled='disabled' ></selectSchool>  
+      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -72,7 +65,7 @@
           align="center"
           show-overflow-tooltip>
         </el-table-column>
-      
+
 
         <el-table-column
           label="请假类型"
@@ -106,7 +99,7 @@
         </el-pagination>
       </div>
     </body-container>
-  
+
   </div>
 
 </template>
@@ -115,18 +108,20 @@
   import {mapActions, mapState, mapGetters} from 'vuex'
   import HeaderBar from "../../components/header-bar";
   import BodyContainer from "../../components/body-container";
-  import {excludeEmpty} from "../../utils";
+  import {excludeEmpty,getBool} from "../../utils";
   import RegionSelect from "../../components/region-select";
+  import selectSchool from "../../components/select-school";
 
   export default {
     name: "CarouselMapList",
-    components: {RegionSelect, BodyContainer, HeaderBar},
+    components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
         loading: false,
+        disabled:false,
         multipleSelection: [],
         categories: [],
         pageNum: 1,
@@ -146,7 +141,7 @@
         this.imageDialogImageUrl = url;
         this.imageDialogVisible = true;
       },
-      ...mapActions("student", ['getLeaveList']),
+      ...mapActions("student", ['getLeaveList','deleteLeave']),
       ...mapActions('common',['getSchoolList']),
       isPriceReduction(specifications) {
         return specifications.some((s) => s["isPriceReduction"]);
@@ -158,25 +153,26 @@
           ...this.searchForm,
           pageNum,
           pageSize,
+          schoolId:localStorage.getItem('schoolId')
         });
         this.loading = false;
         return res;
       },
       carouselMapEdit(index, row) {
-        this.$router.push({path: `/page/lesson/add`, query: {courseId: row.courseId}})
+        this.$router.push({path: `/page/lesson/add`, query: {courseId: row.vacateId}})
       },
       carouselMapInvalid(index, row) {
-        this.$confirm('确认删除该课程？')
+        this.$confirm('确认删除该条记录？')
           .then(async () => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏
-            const {code} = await this.deleteLesson({
-              courseId: row.courseId,
+            const {code} = await this.deleteLeave({
+              vacateId: row.vacateId,
             });
             if (code === '200') {
-              this.$message.success("下架成功!");
+              this.$message.success("删除成功!");
               this.getTableData(this.pageNum, this.pageSize);
             } else {
-              this.$message.error("下架失败,请联系开发人员检查!");
+              this.$message.error("删除失败,请联系开发人员检查!");
             }
           })
           .catch(() => {
@@ -198,9 +194,9 @@
       ...mapState("student", {
         tableData: state => state.leaveList.list||[],
         tableTotal: state => state.leaveList.total|| 0
-      }),
+      }), 
       ...mapState("common", {
-        schoolData: state => state.schoolList.list||[],
+        schoolData: state => state.schoolList||[],
       }),
       ...mapState("platform", {
         appPages: s => s.appPages
@@ -209,11 +205,10 @@
     },
     async created() {
       this.getTableData(this.pageNum, this.pageSize);
-      if(this.schoolData){
+         if(getBool()){
+          this.disabled=true;
+        }
 
-      }else {
-        await this.getSchoolList();
-      }
     }
   }
 </script>

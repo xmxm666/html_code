@@ -21,13 +21,14 @@ export default {
       const res = await requestByPost("server/admin/login", params);
       const {data, code} = res;
       if (code === '200') {
-        localStorage.setItem("token", data.token);
+        sessionStorage.setItem("token", data.token);
         commit("SET_USER", data.administrator);
       }
+      console.log(res)
       return res;
     },
     initAdmin({commit}) {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (token) {
         const body = token.split(".")[1];
         commit("SET_USER", (base64decode(body)).sub);
@@ -39,7 +40,7 @@ export default {
     }, async updateOrAddAdministrator({commit}, params) {
       const res = await requestByPost("web/administrator/createOrUpdateAdministrator", params);
       if (res.data) {
-        localStorage.setItem("token", res.data);
+        sessionStorage.setItem("token", res.data);
         const body = res.data.split(".")[1];
         commit("SET_USER", (base64decode(body)).sub);
       }

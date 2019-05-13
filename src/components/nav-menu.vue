@@ -48,6 +48,7 @@
         }
       },
       drop(){
+        sessionStorage.clear();
         localStorage.clear()
         window.location.reload();
       }

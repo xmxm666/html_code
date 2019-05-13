@@ -1,6 +1,6 @@
 <template>
   <div id="ADD">
-    <header-bar legend="添加/编辑教师"/>
+    <header-bar legend="添加/编辑管理员"/>
     <body-container>
       <el-form size="small" style="width: 600px" label-width="120px" label-position="left">
         <el-form-item label="学校名称" v-if="!disabled" >
@@ -14,14 +14,17 @@
           </el-option>
         </el-select>
         </el-form-item>
-         <el-form-item label="教师ID"  class="recruitmentTitle" v-if="isChange">
+         <el-form-item label="管理员ID"  class="recruitmentTitle" v-if="isChange">
           <el-input placeholder="请输入" :disabled='true' v-model="form.adminId"/>
         </el-form-item>
-        <el-form-item label="教师名" class="recruitmentTitle">
+         <el-form-item label="管理员名称" class="recruitmentTitle">
           <el-input placeholder="请输入" v-model="form.name"/>
         </el-form-item>
-         <el-form-item label="教师手机号" class="recruitmentTitle">
+        <el-form-item label="账号" class="recruitmentTitle">
           <el-input placeholder="请输入" v-model="form.phone"/>
+        </el-form-item>
+         <el-form-item label="密码" class="recruitmentTitle">
+          <el-input placeholder="请输入" v-model="form.password"/>
         </el-form-item>
       </el-form>
       <footer class="c-footer">
@@ -70,22 +73,22 @@
         if(this.isChange){
            const {data,code,msg} = await this.upDataTeacher({
            ...this.form,
-           role:2
+           role:1
          })
           if (code === '200') {
           this.$message.success(msg);
-          this.$pushRoute("/teacher/manage/list")
+          this.$pushRoute("/admin/list")
         } else {
           this.$message.error(msg)
         }
         }else{
           const {data,code,msg} = await this.addTeacher({
            ...this.form,
-           role:2
+           role:1
          })
           if (code === '200') {
           this.$message.success(msg);
-          this.$pushRoute("/teacher/manage/list")
+          this.$pushRoute("/admin/list")
         } else {
           this.$message.error(msg)
         }

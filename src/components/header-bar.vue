@@ -56,6 +56,10 @@
         font-weight: bold;
       }
     }
+    .l-right{
+      display: flex;
+      align-items: center;
+    }
     .c-header {
       &__legend {
         font-size: 16px;

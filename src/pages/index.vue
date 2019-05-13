@@ -37,7 +37,7 @@
       }
     },
     created() {
-      this.getAppPage();
+   
     }
   }
 </script>

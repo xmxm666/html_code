@@ -9,5 +9,10 @@ export const commonRouter = [{
   path: '/msgPage',
   name: "MsgPage",
   component: () => import('@/pages/msg-page'),
-},];
+},{
+  path: '/agreement',
+  name: "agreement",
+  component: () => import('@/pages/registration-agreement'),
+},
+];
 

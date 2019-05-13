@@ -1,12 +1,12 @@
 <template>
   <div id="CarouselMap">
-    <header-bar legend="添加课程"/>
+    <header-bar legend="添加/编辑学员"/>
     <body-container v-loading="loading">
       <el-row type="flex">
         <el-form  class="c-form" inline size="small">
-           <el-form-item label="学校名称" >
+           <el-form-item label="学校名称" v-if="!disabled">
         <!--<location-select style="margin-left: 30px"/>-->
-        <el-select   v-model="schoolname" placeholder="请选择添加到哪个学校" @change="selectSchool">
+        <el-select   v-model="schoolname"  placeholder="请选择添加到哪个学校" @change="selectSchool">
           <el-option
             v-for="item in schoolData"
             :key="item.schoolId"
@@ -17,97 +17,192 @@
         </el-form-item>
         </el-form>
       </el-row>
-      <el-row type="flex">
-        <el-form  class="c-form" inline size="small">
-          <el-form-item label="老师名称" >
-            <!--<location-select style="margin-left: 30px"/>-->
-            <el-select   v-model="teacherName" placeholder="请选择授课教师" @change="selectTeacher">
-              <el-option
-                v-for="item in teacherData"
-                :key="item.adminId"
-                :label="item.name"
-                :value="item.adminId">
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </el-row>
       <el-row type="flex" >
         <el-form  class="c-form" inline size="small">
           <el-row type="flex" :gutter="40" class="l-row">
-            <el-col :span="13">
-              <el-form-item label="课程名" class="c-form__item">
-                <el-input placeholder="请输入" v-model="form.courseName"/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="11">
-              <el-form-item label="课程费用" class="c-form__item">
-                <el-input-number v-model="form.coursePrice" controls-position="right" :min="1" :max="100000"></el-input-number>
+            <el-col :span="24">
+              <el-form-item label="学员姓名" class="c-form__item" required>
+                <el-input placeholder="请输入" v-model="form.userName"/>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row type="flex" :gutter="40" class="l-row">
             <el-col :span="24">
-              <el-form-item label="开课地点" class="c-form__item">
-                <el-input placeholder="请输入" v-model="form.placeClass"/>
+              <el-form-item label="学员性别" class="c-form__item" required>
+                <template>
+                  <el-radio v-model="form.sex" :label="1">男</el-radio>
+                  <el-radio v-model="form.sex" :label="2">女</el-radio>
+                </template>
               </el-form-item>
             </el-col>
+          </el-row>
+          <el-row type="flex" :gutter="40" class="l-row">
             <el-col :span="24">
-              <el-form-item label="上课人数" class="c-form__item">
-                <el-input placeholder="请输入" v-model="form.peopleNumber"/>
+              <el-form-item label="手机号" class="c-form__item" required>
+                <el-input placeholder="请输入" v-model="form.phone"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+              <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="座机号" class="c-form__item">
+                <el-input placeholder="请输入（选填）" v-model="form.telephone"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="身份证号" class="c-form__item" required>
+                <el-input placeholder="请输入" v-model="form.identityCard"/>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row type="flex" class="l-row">
             <el-col :span="24">
-                     
-              <el-form-item label="时间范围" class="c-form__item">
-                <div>
-                  <el-date-picker
-                   value-format="yyyy-MM-dd"
-                    v-model="timeRange"
-                    type="daterange"
-                    range-separator="~"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期">
-                  </el-date-picker>
-                </div>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row type="flex" class="l-row">
-            <el-col :span="24">
-              <el-form-item label="选择星期" >
-                <!--<location-select style="margin-left: 30px"/>-->
-                <el-select size="small"  v-model="selectWeek" placeholder="请选择星期" @change="weekSelect">
+              <el-form-item label="人员分类" required>
+                 <el-select v-model="form.employer" placeholder="请选择">
                   <el-option
-                    v-for="item in WEEK"
-                    :key="item.value"
-                    :label="item.text"
-                    :value="item.value">
+                    v-for="item in studentClassificationColumns"
+                    :key="item"
+                    :label="item"
+                    :value="item">
                   </el-option>
                 </el-select>
-                <span class="sing-time">上课时间</span>
-              <el-time-select
-                placeholder="起始时间"
-                v-model="form.classList[0].startTime"
-                :picker-options="{
-                start: '08:30',
-                step: '00:15',
-                end: '18:30'
-              }">
-              </el-time-select>
-              <el-time-select
-                placeholder="结束时间"
-               
-                v-model="form.classList[0].endTime"
-                :picker-options="{
-                start: '08:30',
-                step: '00:15',
-                end: '18:30',
-                minTime: form.classList[0].startTime
-              }">
-              </el-time-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+            <el-row type="flex" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="政治面貌" >
+                 <el-select v-model="form.political" placeholder="请选择">
+                  <el-option
+                    v-for="item in politicalStatusColumns"
+                    :key="item"
+                    :label="item"
+                    :value="item">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+            <el-row type="flex" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="文化程度" >
+                 <el-select v-model="form.educational" placeholder="请选择">
+                  <el-option
+                    v-for="item in educationalLevelColumns"
+                    :key="item"
+                    :label="item"
+                    :value="item">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+            <el-row type="flex" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="退休状态" >
+                 <el-select v-model="form.retired" placeholder="请选择">
+                  <el-option
+                    v-for="item in retirementStatusColumns"
+                    :key="item"
+                    :label="item"
+                    :value="item">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="工作单位" class="c-form__item">
+                <el-input placeholder="请输入" v-model="form.position"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="职务" class="c-form__item">
+                <el-input placeholder="请输入" v-model="form.job"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+           <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="选择省市" class="c-form__item">
+               <el-cascader
+
+                    size="large"
+              
+                    :options="options"
+              
+                    v-model="selectedOptions"
+              
+                    @change="handleChange">
+              
+                  </el-cascader>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="详细地址" class="c-form__item">
+                <el-input placeholder="请输入" v-model="form.address"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+           <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="加入志愿者" class="c-form__item">
+                <template>
+                  <el-radio v-model="form.volunteer" :label="1">是</el-radio>
+                  <el-radio v-model="form.volunteer" :label="2">否</el-radio>
+                </template>
+              </el-form-item>
+            </el-col>
+          </el-row>
+             <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="在校任职" class="c-form__item">
+                <template>
+                   <el-input placeholder="请输入" v-model="form.schoolJob"/>
+                </template>
+              </el-form-item>
+            </el-col>
+          </el-row>
+             <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="备注" class="c-form__item">
+                <template>
+                    <el-input placeholder="请输入" v-model="form.remark"/>
+                </template>
+              </el-form-item>
+            </el-col>
+          </el-row>
+            <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="紧急联系人" class="c-form__item">
+              </el-form-item>
+            </el-col>
+          </el-row>
+            <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="姓名" class="c-form__item" >
+                <el-input placeholder="请输入" v-model="form.emergencyContact1"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+            <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="关系" class="c-form__item" >
+                <el-input placeholder="请输入" v-model="form.emergencyRelation1"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+            <el-row type="flex" :gutter="40" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="电话" class="c-form__item" >
+                <el-input placeholder="请输入" v-model="form.emergencyPhone1"/>
               </el-form-item>
             </el-col>
           </el-row>
@@ -128,8 +223,9 @@
   import BodyContainer from "../../components/body-container";
   import RegionSelect from "../../components/region-select";
   import ImgUpload from "../../components/img-upload";
-  import {WEEK} from "../../enum";
-  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek} from '../../utils'
+  import {WEEK,politicalStatusColumns,educationalLevelColumns,retirementStatusColumns,studentClassificationColumns} from "../../enum";
+  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek,getBool} from '../../utils'
+  import { provinceAndCityData, regionData, provinceAndCityDataPlus, regionDataPlus, CodeToText, TextToCode } from 'element-china-area-data'
   import _ from 'lodash'
 
 
@@ -139,60 +235,72 @@
     data() {
       return {
         WEEK,
+        politicalStatusColumns,
+        educationalLevelColumns,
+        retirementStatusColumns,
+        studentClassificationColumns,  //以上枚举
+        options: regionData,
         selectWeek:null,
         loading: false,
         timeRange:[],
+        selectedOptions:[],
         schoolname:null,
         teacherName:null,
+        disabled:false,
+        area:'',
         form: {
-          courseName:null,
-          coursePrice:null,
-          placeClass:null,
+          userName:null,
+          sex:1,
+          phone:null,
+          identityCard:null,
           peopleNumber:null,
           schoolId:null,
-          courseTeacher:null,
-          courseId:'',
-          classList:[
-            {
-              week:null,
-              startTime:null,
-              endTime:null
-            },
-          ]
+          political:null,
+          employer:null,
+          educational:null,
+          retired:null,
+          position:null,
+          job:null,
+          volunteer:null,
+          address:null,
+          telephone:null,
+         emergencyContact1:null,
+         emergencyRelation1:null,
+         emergencyPhone1:null,
+         remark:null,
+         schoolJob:null,
+         areaId:null,
         },
-        startTime: '',
-        endTime: ''
       }
     },
     methods: {
-      ...mapActions("lesson", ['addLesson', 'getLessonDetails']),
+      ...mapActions("student", ['addStudent', 'getStudentDetails']),
       ...mapActions('common',["getTeacherList","getSchoolList"]),
-      async submitForm() {
-				if(!this.timeRange){
-					this.$message.error('没有选择时间');
-				}
+      async submitForm() {       
         this.loading = true;
         const form = {
           ...this.form,
-          startDate: this.timeRange[0],
-          endDate: this.timeRange[1],
+          area:this.area
         };
-
-        const {code, msg} = await this.addLesson(form);
+        const {code,msg} = await this.addStudent(form);
         if (code === '200') {
           this.$message.success("操作成功");
-          this.$pushRoute("/page/lesson/list");
+
+          this.$pushRoute("/student/list");
+
         } else {
+
           this.$message.error(msg);
+
         }
         this.loading = false;
       },
-      weekSelect(value){
-        this.form.week=value;
-        this.selectWeek=getTowWeek(value);
-        console.log(getTowWeek(value))
-
+      handleChange (value) {
+        console.log(this.selectedOptions)
+        this.form.areaId=value.join('-');
+        this.area=CodeToText[value[0]]+'-'+CodeToText[value[1]]+'-'+CodeToText[value[2]]
       },
+
       selectSchool(value){
         this.form.schoolId=value;
         this.getTeacherList({schoolId:value});
@@ -211,35 +319,20 @@
       }),
     },
     async created() {
-      const courseId = this.$route.query.courseId;
-      if (courseId) {
-        const {data} = await this.getLessonDetails({courseId});
-        console.log(data)
-        this.getTeacherList({schoolId:data.schoolId});
-        this.schoolname=data.schoolName;
-        this.teacherName=data.teacherName;
-        this.timeRange=[];
-        this.timeRange.push(data.startDate);
-        this.timeRange.push(data.endDate);
-        this.selectWeek=getTowWeek(data.classList[0].week*1);
-    
+         this.disabled=getBool()
+        this.getTeacherList({schoolId:localStorage.getItem('schoolId')});
 
-       this.form = {
-          courseName:data.courseName,
-          coursePrice:data.coursePrice,
-          placeClass:data.placeClass,
-          peopleNumber:data.peopleNumber,
-          schoolId:data.schoolId,
-          courseTeacher:data.courseTeacher,
-          courseId:data.courseId,
-          classList:[
-            {
-              week:data.classList[0].week,
-              startTime:data.classList[0].startTime,
-              endTime:data.classList[0].endTime
-            },
-          ]
-        }
+      const userId = this.$route.query.userId;
+      const schoolId = this.$route.query.schoolId;
+      if (userId) {
+      const {data} = await this.getStudentDetails({userId,schoolId})
+
+       this.form = data;
+       this.schoolname=data.schoolName
+       if(data.area){
+        this.selectedOptions=data.areaId.split('-');
+        console.log(this.selectedOptions)
+       }      
       }
       if(!this.schoolData){
         await this.getSchoolList();
@@ -253,7 +346,7 @@
 
   }
   .el-form-item__label{
-    width: 70px !important;
+    width: 90px !important;
     text-align: left;
   }
 </style>

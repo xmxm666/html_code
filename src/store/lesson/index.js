@@ -20,16 +20,15 @@ export default {
      */
     async getLessonList({commit}, params) {
       const {data} = await requestByPost("server/teacher/courseList", {
-        ...params,
+        ...params, 
       });
+      console.log(data)
       commit("SET_LESSON_LIST", data);
       return data
     },
     //删除课程
-    deleteLesson({commit}, params) {
-      return requestByGet("server/teacher/deleteCourse", {
-        ...params,
-      });
+   async deleteLesson({commit}, params) {
+      return await requestByPost("server/teacher/deleteCourse", params);
     },
     //添加修改课程
     addLesson({commit}, params) {
@@ -63,6 +62,14 @@ export default {
       //删除课程设置
       async deleteLessonSetting({commit}, params) {
         return await requestByPost("regist/deleteco", params);
+      },
+      //启用停用课程
+      async changeLessonStatus({commit}, params) {
+        return await requestByPost("server/teacher/updateIsenable", params);
+      },
+      //下载课程
+      async downLessonData({commit}, params) {
+        return await requestByPost("server/fileDown/courseListDowm", params);
       },
   },
 }

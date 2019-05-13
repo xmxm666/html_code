@@ -1,17 +1,17 @@
 <template>
   <div id="CarouselMap">
-    <header-bar legend="添加课程"/>
+    <header-bar legend="添加/修改报名条件设置"/>
     <body-container v-loading="loading">
       <el-row type="flex">
         <el-form  class="c-form" inline size="small">
-           <el-form-item label="学校名称" >
+           <el-form-item label="学校名称" v-if="!disabled" >
         <!--<location-select style="margin-left: 30px"/>-->
-        <el-select   v-model="schoolname" placeholder="请选择添加到哪个学校" @change="selectSchool">
+        <el-select   v-model="form.schoolName" placeholder="请选择添加到哪个学校" @change="selectSchool">
           <el-option
             v-for="item in schoolData"
             :key="item.schoolId"
             :label="item.schoolName"
-            :value="item.schoolId">
+            :value="item.schoolName+'-'+item.schoolId">
           </el-option>
         </el-select>
         </el-form-item>
@@ -21,12 +21,16 @@
         <el-form  class="c-form" inline size="small">
           <el-form-item label="课程名称" >
             <!--<location-select style="margin-left: 30px"/>-->
-            <el-select   v-model="courseName" placeholder="请选择课程名称" @change="selectTeacher">
+            <el-select   v-model="form.courseName" placeholder="请选择课程名称" @change="selectTeacher">
+               <el-option
+                label="全部"
+                :value="0">
+              </el-option>
               <el-option
                 v-for="item in lessonData"
                 :key="item.courseId"
                 :label="item.courseName"
-                :value="item.courseId">
+                :value="item.courseName+'-'+item.courseId">
               </el-option>
             </el-select>
           </el-form-item>
@@ -96,7 +100,7 @@
   import RegionSelect from "../../../components/region-select";
   import ImgUpload from "../../../components/img-upload";
   import {WEEK} from "../../../enum";
-  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek} from '../../../utils'
+  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek, getBool} from '../../../utils'
   import _ from 'lodash'
 
 
@@ -109,14 +113,16 @@
         selectWeek:null,
         loading: false,
         timeRange:[],
-        schoolname:null,
-        courseName:null,
+       
         people:[],
+        disabled:false,
         form: {
           schoolId:null,
           courseId:'',
           startAge:null,
           endAge:null,
+          schoolName:null,
+          courseName:null,
           registCategoryOne:null,
           registCategoryTwo:null,
           registCategoryThree:null,
@@ -124,7 +130,7 @@
           registCategoryFive:null,
           registCategorySix:null,
         },
-        options:['教师','本单位职工','本单位职工家属','其他','本社区居民','管理员'],
+        options:['本单位职工','本单位职工家属','其他','本社区居民'],
         startTime: '',
         endTime: ''
       }
@@ -133,10 +139,9 @@
       ...mapActions("lesson", ['addLessonSetting', 'getLessonSettingDetails','getLessonList','upDataLessonSetting']),
       ...mapActions('common',["getSchoolList"]),
       async submitForm() {
-        console.log(this.people)
+        console.log(this.form)
       
        this.people = _.compact(this.people);
-        console.log(this.people)
 
         this.form.registCategoryOne=this.people[0]
         this.form.registCategoryTwo=this.people[1]
@@ -179,15 +184,16 @@
       weekSelect(value){
         this.form.week=value;
         this.selectWeek=getTowWeek(value);
-        console.log(getTowWeek(value))
 
       },
       selectSchool(value){
-        this.form.schoolId=value;
-        this.getLessonList({schoolId:value});
+        this.form.schoolName=value.split('-')[0];
+        this.form.schoolId=value.split('-')[1];
+        this.getLessonList({schoolId:this.form.schoolId});
       },
       selectTeacher(value){
-         this.form.courseId=value;
+        this.form.courseName=value.split('-')[0];
+        this.form.courseId=value.split('-')[1];
       }
 			
     },
@@ -201,14 +207,15 @@
       }),
     },
     async created() {
+      this.disabled=getBool()
+      this.getLessonList({schoolId:localStorage.getItem('schoolId')});
       const id = this.$route.query.id;
       if (id) {
         const {data} = await this.getLessonSettingDetails({id});
         console.log(data)
         const result = await this.getLessonList({schoolId:data.schoolId});
         console.log(result)
-        this.courseName=result[0].courseName;
-        this.schoolname=data.schoolName;
+    
         this.teacherName=data.teacherName;
         this.timeRange=[];
         this.timeRange.push(data.registstartTime.split(' ')[0]);
@@ -226,6 +233,8 @@
             courseId:data.courseId,
             startAge:data.startAge,
             endAge:data.endAge,
+            courseName:result[0].courseName,
+            schoolName:data.schoolName,
          
         }
       }

@@ -1,5 +1,5 @@
 <template>
-  <img :src="url" alt="志汇同城">
+  <img :src="url" alt="">
 </template>
 
 <script>

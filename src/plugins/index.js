@@ -15,7 +15,7 @@ Plugin.install = function (Vue, options) {
         systemInfo: s => s.systemInfo
       }),
       assetPath() {
-        return "https://kf.zhyos.vip"
+        return "http://120.27.16.130"
       },
       $themeColor() {
         return "#5DB271";

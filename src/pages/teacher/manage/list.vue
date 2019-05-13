@@ -2,19 +2,12 @@
   <div id="List">
     <header-bar legend="教师列表">
       <div slot="left">
-        <el-button type="primary" size="small" style="margin-left: 20px" @click="$pushRoute('/teacher/manage/add')">
+        <el-button type="primary" size="small"  style="margin-left: 20px" @click="$pushRoute('/teacher/manage/add')">
           添加教师
         </el-button>
       </div>
-      <el-select size="small" v-model="searchForm.schoolId" placeholder="请选择学校">
-        <el-option
-          v-for="item in schoolData"
-          :key="item.schoolId"
-          :label="item.schoolName"
-          :value="item.schoolId">
-        </el-option>
-      </el-select>
-      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
+      <selectSchool :disabled='disabled' ></selectSchool>    
+      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -54,15 +47,15 @@
           show-overflow-tooltip
           >
         </el-table-column>
-        <el-table-column
+        <!-- <el-table-column
           label="审核状态"
           align="center">
           <template slot-scope="scope">
             <el-tag size="medium" :type="scope.row.status?`success`:`info`">{{scope.row.status?`通过`:`待审核`}}</el-tag>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="快捷操作"
-                        
+
                          align="center">
           <template slot-scope="scope">
             <el-button
@@ -112,12 +105,14 @@
   import {mapActions, mapState, mapGetters} from 'vuex'
   import HeaderBar from "../../../components/header-bar";
   import BodyContainer from "../../../components/body-container";
-  import {excludeEmpty} from "../../../utils";
+  import {excludeEmpty,getBool} from "../../../utils";
   import RegionSelect from "../../../components/region-select";
+  import selectSchool from "../../../components/select-school";
+  
 
   export default {
     name: "List",
-    components: {RegionSelect, BodyContainer, HeaderBar},
+    components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
         imageDialogVisible: false,
@@ -127,6 +122,7 @@
         multipleSelection: [],
         categories: [],
         pageNum: 1,
+        disabled:false,
         pageSize: 10,
         pieChart: null,
         barChart: null,
@@ -134,20 +130,22 @@
         featureBtnState: 0,
         //默认搜索条件
         searchForm: {
-          schoolId: null,
+          role:2
         },
       }
     },
     methods: {
-      ...mapActions("common", ['getTeacherList']),
+      ...mapActions("common", ['getTeacherList','getSchoolList']),
       ...mapActions("teacher", ['deleteTeacher']),
 
       async getTableData(pageNum, pageSize) {
+
         this.loading = true;
         const res = await this.getTeacherList({
           ...this.searchForm,
           pageNum,
           pageSize,
+          schoolId:localStorage.getItem('schoolId')
         });
         this.loading = false;
         return res;
@@ -188,8 +186,6 @@
         this.getTableData(this.pageNum, this.pageSize);
       },
 
-
-
     },
     computed: {
       ...mapState("common", {
@@ -197,7 +193,7 @@
         tableTotal: state => state.teacherList.total|| 0
       }),
       ...mapState("common", {
-        schoolData: state => state.schoolList.list||[],
+        schoolData: state => state.schoolList||[],
       }),
       ...mapState("platform", {
         appPages: s => s.appPages
@@ -206,9 +202,10 @@
     },
     async created() {
      await this.getTableData(this.pageNum, this.pageSize);
-   
-        await this.getSchoolList();
-      
+         if(getBool()){
+          this.disabled=true;
+          this.searchForm.schoolId=localStorage.getItem('schoolName');
+        }
     }
   }
 </script>

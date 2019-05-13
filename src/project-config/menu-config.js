@@ -13,7 +13,7 @@ export const menuConfig = [{
     path: "/page/lesson/list",
   },
   {
-    legend: "课程设置",
+    legend: "报名条件设置",
     path: "/page/lesson/setting/list",
   },
     ]
@@ -31,16 +31,26 @@ export const menuConfig = [{
       legend: "请假列表",
       path: "/student/leaveList",
     },
+    {
+      legend: "注销列表",
+      path: "/student/logoutList",
+    },
+  
+
   ]
 },
   {
-  legend: "教师管理",
+  legend: "人员管理",
   icon: "el-icon-menu",
   path: "/teacher/manage/list",
   children: [
     {
       legend: "教师列表",
       path: "/teacher/manage/list",
+    },
+    {
+      legend: "管理员列表",
+      path: "/admin/list",
     },
   ]
 },

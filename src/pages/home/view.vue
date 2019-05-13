@@ -1,14 +1,7 @@
 <template>
   <div id="home">
     <header-bar legend="数据概览">
-      <el-select size="small" v-model="value" filterable  placeholder="请选择" @change="selectSchool(value)">
-        <el-option
-          v-for="item in schoolData"
-          :key="item.schoolId"
-          :label="item.schoolName"
-          :value="item.schoolId">
-        </el-option>
-      </el-select>
+      <selectSchool :disabled='disabled' ></selectSchool>  
       <el-button type="success" size="small" style="width: 80px;margin-left: 20px">确认</el-button>
     </header-bar>
     <body-container color="#f4f4f4">
@@ -47,7 +40,8 @@
   import BodyContainer from "../../components/body-container";
   import DataCard from "../../components/data-card";
   import Echarts from 'echarts'
-
+  import {getBool} from '../../utils'
+  import selectSchool from "../../components/select-school";
 
   var colors = ['#5793f3', '#d14a61', '#675bba'];
   var option = {
@@ -133,11 +127,12 @@
   };
   export default {
     name: "home",
-    components: {DataCard, BodyContainer, HeaderBar},
+    components: {DataCard, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
         value: '',
         schoolName:null,
+        disabled:false
       }
     },
     methods: {
@@ -152,18 +147,20 @@
     },
     computed: {
       ...mapState('common',{
-        schoolData:state=>state.schoolList.list
+        schoolData:state=>state.schoolList
       })
+    },
+    mounted(){
+    
+
     },
    async created() {
       this.$nextTick(() => {
         var myChart = Echarts.init(this.$refs.main);
         myChart.setOption(option)
       });
-   
         await this.getSchoolList();
-
-
+            this.disabled=getBool();
     }
   }
 </script>

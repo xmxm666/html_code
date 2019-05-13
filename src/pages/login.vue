@@ -47,12 +47,24 @@
     methods: {
       ...mapActions("administrator", ["login"]),
       async submitLogin() {
-        const {code, msg} = await this.login({...this.form});
+        const {code,data, msg} = await this.login({...this.form});
+        console.log(code)
         if (code === '200') {
+
+          if(data){
+            localStorage.setItem('schoolId',data.admin.schoolId)
+            localStorage.setItem('schoolName',data.schoolName);
+            localStorage.setItem('role',data.admin.role)
+
+            if(data.admin.role===0){
+              localStorage.setItem('schoolId',0)
+            }
+
+          }
           this.$message({
             message: '登录成功!',
             type: 'success',
-            duration: 600,
+            duration: 200,
             onClose: () => {
               this.$router.replace("/home/view");
             }

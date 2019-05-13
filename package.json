@@ -15,7 +15,7 @@
     "dayjs": "^1.7.8",
     "echarts": "^4.2.0-rc.2",
     "echarts-liquidfill": "^2.0.3",
-    "element-china-area-data": "^4.1.1",
+    "element-china-area-data": "^4.1.2",
     "element-ui": "^2.4.11",
     "iview": "^3.2.0",
     "lodash": "^4.17.11",

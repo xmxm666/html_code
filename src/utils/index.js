@@ -268,3 +268,10 @@ export function convertUTCTimeToLocalTime(UTCDateString,type) {
         return msg
       }
   }
+  export function getBool(){
+    if(localStorage.getItem('role')==='1'){
+      return true
+    }else{
+      return false
+    }
+  }

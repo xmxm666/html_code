@@ -1,12 +1,12 @@
 <template>
   <div id="CarouselMap">
-    <header-bar legend="添加课程"/>
+    <header-bar legend="添加/修改课程"/>
     <body-container v-loading="loading">
       <el-row type="flex">
         <el-form  class="c-form" inline size="small">
-           <el-form-item label="学校名称" >
+           <el-form-item label="学校名称" v-if="!disabled" >
         <!--<location-select style="margin-left: 30px"/>-->
-        <el-select   v-model="schoolname" placeholder="请选择添加到哪个学校" @change="selectSchool">
+        <el-select   v-model="schoolname"  placeholder="请选择添加到哪个学校" @change="selectSchool">
           <el-option
             v-for="item in schoolData"
             :key="item.schoolId"
@@ -42,7 +42,7 @@
             </el-col>
             <el-col :span="11">
               <el-form-item label="课程费用" class="c-form__item">
-                <el-input-number v-model="form.coursePrice" controls-position="right" :min="1" :max="100000"></el-input-number>
+                <el-input-number v-model="form.coursePrice" controls-position="right" :precision="2" :step="0.01" :max="100000"></el-input-number>
               </el-form-item>
             </el-col>
           </el-row>
@@ -111,6 +111,21 @@
               </el-form-item>
             </el-col>
           </el-row>
+           <el-row type="flex" class="l-row">
+            <el-col :span="24">   
+              <el-form-item label="是否启用" class="c-form__item">
+                <div>
+                 <el-switch
+                    v-model="form.isenable"
+                    :active-value='1'
+                    :inactive-value='0'
+                    active-text="是"
+                    inactive-text="否">
+                </el-switch>
+                </div>
+              </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
       </el-row>
       <footer class="c-footer">
@@ -129,7 +144,7 @@
   import RegionSelect from "../../components/region-select";
   import ImgUpload from "../../components/img-upload";
   import {WEEK} from "../../enum";
-  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek} from '../../utils'
+  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek, getBool} from '../../utils'
   import _ from 'lodash'
 
 
@@ -144,6 +159,7 @@
         timeRange:[],
         schoolname:null,
         teacherName:null,
+        disabled:false,
         form: {
           courseName:null,
           coursePrice:null,
@@ -152,6 +168,7 @@
           schoolId:null,
           courseTeacher:null,
           courseId:'',
+          isenable:null,
           classList:[
             {
               week:null,
@@ -183,12 +200,13 @@
           this.$message.success("操作成功");
           this.$pushRoute("/page/lesson/list");
         } else {
+           this.loading = false;
           this.$message.error(msg);
         }
         this.loading = false;
       },
       weekSelect(value){
-        this.form.week=value;
+        this.form.classList[0].week=value;
         this.selectWeek=getTowWeek(value);
         console.log(getTowWeek(value))
 
@@ -211,6 +229,9 @@
       }),
     },
     async created() {
+      this.disabled=getBool()
+        this.getTeacherList({schoolId:localStorage.getItem('schoolId')});
+
       const courseId = this.$route.query.courseId;
       if (courseId) {
         const {data} = await this.getLessonDetails({courseId});
@@ -232,6 +253,7 @@
           schoolId:data.schoolId,
           courseTeacher:data.courseTeacher,
           courseId:data.courseId,
+          isenable:data.isenable*1,
           classList:[
             {
               week:data.classList[0].week,

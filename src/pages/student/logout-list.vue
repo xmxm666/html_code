@@ -1,14 +1,11 @@
 <template>
   <div id="CarouselMapList">
-    <header-bar legend="报条件设置列表">
+    <header-bar legend="注销申请列表">
       <div slot="left">
-        <el-button type="primary" size="small" style="margin-left: 20px" @click="$pushRoute('/page/lesson/setting/add')">
-          添加设置
-        </el-button>
-      </div>
-                 <selectSchool :disabled='disabled' ></selectSchool>  
 
-      <el-button type="success" @click="getTableData(1,10)" size="small" :disabled='disabled' style="width: 80px;margin-left: 20px">搜索
+      </div>
+     <selectSchool :disabled='disabled' ></selectSchool>  
+      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -25,81 +22,51 @@
           type="selection"
           width="55">
         </el-table-column>
-              <el-table-column
-          prop="schoolName"
-          label="学校名称"
+        <el-table-column
+          label="ID"
           align="center"
-        >
+          prop="wid"
+          width="100">
         </el-table-column>
         <el-table-column
-          label="课程名"
+          prop="userName"
+          label="请求人"
           align="center"
-          prop="courseName"
-        >
+          width="100">
         </el-table-column>
-  
         <el-table-column
-          prop="registstartTime"
-          label="开始时间"
+          prop="school"
+          label="请求学校"
           align="center"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
-          prop="registendTime"
-          label="结束时间"
-          align="center"
-          :formatter="formatterGenerator('dateTime')"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="startAge"
-          label="最小年龄"
-          align="center"
-          :formatter="formatterGenerator('dateTime')"
-          show-overflow-tooltip>
-          <template  slot-scope="scope">
-            {{scope.row.startAge}}岁
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="coursePrice"
-          label="最大年龄"
+          prop="content"
+          label="注销原因"
           align="center"
           show-overflow-tooltip>
-          <template  slot-scope="scope">
-            {{scope.row.endAge}}岁
-          </template>
         </el-table-column>
-          <el-table-column
-          prop="coursePrice"
-          label="报名条件"
-          align="center"
-          show-overflow-tooltip>
-          <template  slot-scope="scope">
-            {{scope.row.registCategoryOne}} {{scope.row.registCategoryTwo}} {{scope.row.registCategoryThree}}
-             {{scope.row.registCategoryFive}}  {{scope.row.registCategoryFour}} {{scope.row.registCategorySix}}
-          </template>
-        </el-table-column>
+         
         <el-table-column
           label="状态"
           align="center"
           width="100">
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.invalid?`danger`:`success`">{{scope.row.invalid?`失效`:`正常`}}</el-tag>
+            <el-tag size="medium" :type="scope.row.checkin!==2?`info`:`danger`">{{scope.row.checkin!==2?`待审核`:`已拒绝`}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="快捷操作"
-                         width="200"
                          align="center">
           <template slot-scope="scope">
-            <el-button
+             <el-button
               size="mini"
-              @click="carouselMapEdit(scope.$index, scope.row)">编辑
+              type="success"
+              @click="passBtn(scope.$index, scope.row)">通过
             </el-button>
-            <el-button
+               <el-button
               size="mini"
               type="danger"
-              @click="carouselMapInvalid(scope.$index, scope.row)">删除
+              @click="refuseBtn(scope.$index, scope.row)">拒绝
             </el-button>
           </template>
         </el-table-column>
@@ -123,11 +90,11 @@
 
 <script>
   import {mapActions, mapState, mapGetters} from 'vuex'
-  import HeaderBar from "../../../components/header-bar";
-  import BodyContainer from "../../../components/body-container";
-  import {excludeEmpty,getTrue,getBool} from "../../../utils";
-  import RegionSelect from "../../../components/region-select";
-  import selectSchool from "../../../components/select-school";
+  import HeaderBar from "../../components/header-bar";
+  import BodyContainer from "../../components/body-container";
+  import {excludeEmpty,getBool} from "../../utils";
+  import RegionSelect from "../../components/region-select";
+  import selectSchool from "../../components/select-school";
 
   export default {
     name: "CarouselMapList",
@@ -138,13 +105,13 @@
         imageDialogImageUrl: '',
         value: '',
         loading: false,
+        disabled:false,
         multipleSelection: [],
         categories: [],
         pageNum: 1,
         pageSize: 10,
         pieChart: null,
         barChart: null,
-        disabled:false,
         //根据是否失效来切换按钮
         featureBtnState: 0,
         //默认搜索条件
@@ -158,7 +125,7 @@
         this.imageDialogImageUrl = url;
         this.imageDialogVisible = true;
       },
-      ...mapActions("lesson", ['getLessonSettingList','deleteLessonSetting']),
+      ...mapActions("student", ['getLogoutList','passStudentLogout']),
       ...mapActions('common',['getSchoolList']),
       isPriceReduction(specifications) {
         return specifications.some((s) => s["isPriceReduction"]);
@@ -166,36 +133,50 @@
       async getTableData(pageNum, pageSize) {
         this.searchForm=excludeEmpty(this.searchForm)
         this.loading = true;
-        const res = await this.getLessonSettingList({
+        const res = await this.getLogoutList({
           ...this.searchForm,
           pageNum,
           pageSize,
-           schoolId:localStorage.getItem('schoolId')||'2'
+           schoolId:localStorage.getItem('schoolId')
         });
         this.loading = false;
         return res;
       },
-      carouselMapEdit(index, row) {
-        this.$router.push({path: `/page/lesson/setting/add`, query: {id: row.id}})
+       async passBtn(index, row){
+       const {code,msg} = await this.passStudentLogout({
+          checkin:0,
+          wid:row.wid,
+          uid:row.uid,
+          userItemId:row.userItemId
+        })
+        if(code==='200'){
+           this.$message({
+          message: '操作成功',
+          type: 'success'
+        });
+          this.getTableData(this.pageNum, this.pageSize);
+        }else{
+          this.$message.error(msg);
+        }
       },
-      carouselMapInvalid(index, row) {
-        this.$confirm('确认删除该设置？')
-          .then(async () => {
-            //如果row有值就是表格中的按钮 否则就是下面的工具栏
-            const {code} = await this.deleteLessonSetting({
-              id: row.id,
-            });
-            if (code === '200') {
-              this.$message.success("删除成功!");
-              this.getTableData(this.pageNum, this.pageSize);
-            } else {
-              this.$message.error("删除失败,请联系开发人员检查!");
-            }
-          })
-          .catch(() => {
-            this.$message("操作已取消");
-          });
+      async refuseBtn(index, row){
+       const {code,msg} = await this.passStudentLogout({
+          checkin:2,
+          wid:row.wid,
+          uid:row.uid,
+          userItemId:row.userItemId
+        })
+        if(code==='200'){
+           this.$message({
+          message: '操作成功',
+          type: 'success'
+        });
+          this.getTableData(this.pageNum, this.pageSize);
+        }else{
+          this.$message.error(msg);
+        }
       },
+     
       pageSizeChange(size) {
         this.pageSize = size;
         this.getTableData(this.pageNum, this.pageSize);
@@ -208,9 +189,9 @@
 
     },
     computed: {
-      ...mapState("lesson", {
-        tableData: state => state.lessonSettingList.results||[],
-        tableTotal: state => state.lessonSettingList.total|| 0
+      ...mapState("student", {
+        tableData: state => state.logoutList.list||[],
+        tableTotal: state => state.logoutList.total|| 0
       }),
       ...mapState("common", {
         schoolData: state => state.schoolList||[],
@@ -221,8 +202,9 @@
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
-      await this.getTableData(this.pageNum, this.pageSize);
-        if(getBool()){
+     await this.getTableData(this.pageNum, this.pageSize);
+     console.log(this.tableData)
+         if(getBool()){
           this.disabled=true;
         }
 

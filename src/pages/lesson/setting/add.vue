@@ -24,7 +24,7 @@
             <el-select   v-model="form.courseName" placeholder="请选择课程名称" @change="selectTeacher">
                <el-option
                 label="全部"
-                :value="0">
+                value="全部-0">
               </el-option>
               <el-option
                 v-for="item in lessonData"
@@ -118,7 +118,7 @@
         disabled:false,
         form: {
           schoolId:null,
-          courseId:'',
+          courseId:null,
           startAge:null,
           endAge:null,
           schoolName:null,
@@ -194,6 +194,7 @@
       selectTeacher(value){
         this.form.courseName=value.split('-')[0];
         this.form.courseId=value.split('-')[1];
+        console.log(this.form.courseId)
       }
 			
     },
@@ -205,6 +206,7 @@
        ...mapState('lesson',{
         lessonData:state=>state.lessonList||[],
       }),
+     
     },
     async created() {
       this.disabled=getBool()

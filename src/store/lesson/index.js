@@ -4,7 +4,8 @@ export default {
   namespaced: true,
   state: {
     lessonList: [],
-    lessonSettingList:[]
+    lessonSettingList:[],
+    lessonSpecialList:[]
   },
   mutations: {
     SET_LESSON_LIST(state, data) {
@@ -12,6 +13,9 @@ export default {
     },
     SET_LESSON_SETTING_LIST(state, data) {
       state.lessonSettingList = data;
+    },
+    SET_SPECIAL_LESSON_SETTING_LIST(state, data) {
+      state.lessonSpecialList = data;
     },
   },
   actions: {
@@ -30,6 +34,11 @@ export default {
    async deleteLesson({commit}, params) {
       return await requestByPost("server/teacher/deleteCourse", params);
     },
+    //移除课程
+    
+    async removeLesson({commit}, params) {
+      return await requestByPost("regist/deletesp", params);
+    },
     //添加修改课程
     addLesson({commit}, params) {
       return requestByPost("server/teacher/createCourse", {
@@ -46,6 +55,12 @@ export default {
     async getLessonSettingList({commit}, params) {
       const {data} = await requestByGet("regist/show", params);
       commit("SET_LESSON_SETTING_LIST", data);
+    },
+     //获取特别设置
+     async showSpecial({commit}, params) {
+      const {data} = await requestByGet("regist/showspecial", params);
+      commit("SET_SPECIAL_LESSON_SETTING_LIST", data);
+
     },
     //获取课程设置详情
     async getLessonSettingDetails({commit}, params) {
@@ -71,5 +86,6 @@ export default {
       async downLessonData({commit}, params) {
         return await requestByPost("server/fileDown/courseListDowm", params);
       },
+     
   },
 }

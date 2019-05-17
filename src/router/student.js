@@ -34,6 +34,26 @@ export const studentRouter = {
             name: 'LogoutList',
             component:  () => import('@/pages/student/logout-list'),
           },
+          {
+            path: 'submission',
+            meta:{title:'投稿'},
+            name: 'Submission',
+            component:  () => import('@/pages/student/submission/container'),
+            children: [
+              {
+                path: 'add',
+                meta:{title:'添加投稿'},
+                name: 'SubmissionAdd',
+                component: () => import('@/pages/student/submission/add'),
+              },
+               {
+                path: 'list',
+                meta:{title:'投稿列表'},
+                name: 'SubmissionList',
+                component:  () => import('@/pages/student/submission/list'),
+              },
+            ]
+          },
         ]
       }
     ]

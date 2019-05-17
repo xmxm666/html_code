@@ -203,7 +203,6 @@
     },
     async created() {
      await this.getTableData(this.pageNum, this.pageSize);
-     console.log(this.tableData)
          if(getBool()){
           this.disabled=true;
         }

@@ -48,7 +48,6 @@
       ...mapActions("administrator", ["login"]),
       async submitLogin() {
         const {code,data, msg} = await this.login({...this.form});
-        console.log(code)
         if (code === '200') {
 
           if(data){

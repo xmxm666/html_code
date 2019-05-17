@@ -403,7 +403,6 @@
         },
       specialLessonList(){
         return _.compact(this.tableData.map(item=>{
-          console.log(this.all)
           if(this.all){
            if(item.courseId!==0){
             return item

@@ -143,7 +143,6 @@
         this.schoolName=data.schoolName;
         this.ruleForm.schoolId=data.schoolId;
         this.type.push(data.type*1);
-        console.log(this.type)
         this.ruleForm.title=data.title;
         this.ruleForm.istop=data.istop*1;
         this.ruleForm.ispublic=data.ispublic*1;

@@ -1,6 +1,6 @@
 <template>
-    <div id="Manage">
-      <router-view/>
+    <div id="Container">
+       <router-view/>
     </div>
 
 </template>
@@ -9,7 +9,7 @@
     import {mapActions, mapState, mapGetters} from 'vuex'
 
     export default {
-        name: "manage",
+        name: "Container",
         data() {
             return {}
         },
@@ -21,6 +21,6 @@
 </script>
 
 <style scoped lang="scss">
-    #Manage {
+    #Container {
     }
 </style>

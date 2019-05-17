@@ -296,7 +296,6 @@
         this.loading = false;
       },
       handleChange (value) {
-        console.log(this.selectedOptions)
         this.form.areaId=value.join('-');
         this.area=CodeToText[value[0]]+'-'+CodeToText[value[1]]+'-'+CodeToText[value[2]]
       },
@@ -306,7 +305,6 @@
         this.getTeacherList({schoolId:value});
       },
       selectTeacher(value){
-        console.log(this.timeRange)
          this.form.courseTeacher=value;
       }
 			
@@ -331,7 +329,7 @@
        this.schoolname=data.schoolName
        if(data.area){
         this.selectedOptions=data.areaId.split('-');
-        console.log(this.selectedOptions)
+        this.area=data.area
        }      
       }
       if(!this.schoolData){

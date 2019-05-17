@@ -89,7 +89,6 @@
       ...mapActions('school',['addArticle','getArticlDetails']),
       ...mapActions('common',['getSchoolList']),
       async submitForm() {
-        console.log(this.ruleForm)
         this.loading = true;
         if(this.isChange){
           this.ruleForm.id= this.id;
@@ -107,7 +106,6 @@
 
       },
       handleRemove(file, fileList) {
-        console.log(file, fileList);
       },
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
@@ -125,7 +123,6 @@
     async created() {
       const id = this.$route.query.id;
       if (id) {
-        console.log(id)
         this.isChange=true;
         const {data} = await this.getArticlDetails({id});
         this.id=data.id;

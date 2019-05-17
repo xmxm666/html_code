@@ -6,7 +6,11 @@
           添加学校
         </el-button>
       </div>
-        <selectSchool :disabled='disabled' ></selectSchool> 
+        <el-input
+        placeholder="请输入学校名"
+        prefix-icon="el-icon-search"
+        v-model="searchForm.schoolName">
+      </el-input>
       <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
@@ -125,6 +129,7 @@
         //默认搜索条件
         searchForm: {
           appPageId: null,
+          schoolName:null,
         },
       }
     },

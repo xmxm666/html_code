@@ -139,7 +139,6 @@
       ...mapActions("lesson", ['addLessonSetting', 'getLessonSettingDetails','getLessonList','upDataLessonSetting']),
       ...mapActions('common',["getSchoolList"]),
       async submitForm() {
-        console.log(this.form)
       
        this.people = _.compact(this.people);
 
@@ -194,7 +193,6 @@
       selectTeacher(value){
         this.form.courseName=value.split('-')[0];
         this.form.courseId=value.split('-')[1];
-        console.log(this.form.courseId)
       }
 			
     },
@@ -214,15 +212,12 @@
       const id = this.$route.query.id;
       if (id) {
         const {data} = await this.getLessonSettingDetails({id});
-        console.log(data)
         const result = await this.getLessonList({schoolId:data.schoolId});
-        console.log(result)
-    
+      console.log(data)
         this.teacherName=data.teacherName;
         this.timeRange=[];
         this.timeRange.push(data.registstartTime.split(' ')[0]);
         this.timeRange.push(data.registendTime.split(' ')[0]);
-        console.log(this.timeRange)
         this.people.push(data.registCategoryOne);
         this.people.push(data.registCategoryTwo);
         this.people.push(data.registCategoryThree);
@@ -235,7 +230,7 @@
             courseId:data.courseId,
             startAge:data.startAge,
             endAge:data.endAge,
-            courseName:result[0].courseName,
+            courseName:data.courseName,
             schoolName:data.schoolName,
          
         }

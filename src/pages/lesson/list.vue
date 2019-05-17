@@ -5,6 +5,9 @@
         <el-button type="primary" size="small" style="margin-left: 20px" @click="$pushRoute('/page/lesson/add')">
           添加课程
         </el-button>
+         <el-button type="primary" size="small" style="margin-left: 20px" @click="dialogVisible=true">
+          设置时间
+        </el-button>
       </div>
        <el-date-picker
        :style="{marginRight:'10px'}"
@@ -135,7 +138,42 @@
         </el-pagination>
       </div>
     </body-container>
-
+    <!-- 设置时间弹窗 -->
+    <el-dialog
+      title="设置全部课程时间"
+      :visible.sync="dialogVisible"
+      width="30%"
+      >
+      <section :style="{marginBottom:'10px'}"><span>选择学校：</span>
+       <el-select v-model="schoolId" placeholder="请选择状态" :style="{marginRight:'10px',height:'32px'}">
+        <el-option
+          v-for="item in schoolData"
+          :key="item.schoolId"
+          :label="item.schoolName"
+          :value="item.schoolId">
+        </el-option>
+      </el-select>
+      </section>
+      <section :style="{display:'flex',alignItems:'center'}">
+        <p :style="{minWidth:'70px'}">选择时间：</p>
+        <el-date-picker
+        
+        v-model="allTime"
+        type="daterange"
+        align="right"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        :picker-options="pickerOptions">
+      </el-date-picker>
+      </section>
+       
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="settingTime">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -154,9 +192,14 @@
     components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
+          dialogVisible: false,
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
+        //
+        allTime:null,
+        schoolId:null,
+        //
         loading: false,
         multipleSelection: [],
         categories: [],
@@ -217,7 +260,7 @@
         this.imageDialogImageUrl = url;
         this.imageDialogVisible = true;
       },
-      ...mapActions("lesson", ['getLessonList','deleteLesson','changeLessonStatus','downLessonData']),
+      ...mapActions("lesson", ['getLessonList','deleteLesson','changeLessonStatus','downLessonData','settingTimer']),
       ...mapActions('common',['getSchoolList']),
       isPriceReduction(specifications) {
         return specifications.some((s) => s["isPriceReduction"]);
@@ -271,6 +314,34 @@
           .catch(() => {
             this.$message("操作已取消");
           });
+      },
+      //设置时间
+      async settingTime(){
+        if(this.allTime){
+          if(!this.schoolId){
+             this.$message.error("您还未选择学校");
+             return false
+          }
+          let timeForm={}
+          timeForm.startDate=convertUTCTimeToLocalTime(this.allTime[0],'y-m-d');
+          timeForm.endDate=convertUTCTimeToLocalTime(this.allTime[1],'y-m-d');
+         const {data,code,msg} =  await this.settingTimer({
+            ...timeForm,
+            schoolId:this.schoolId
+        })
+        if(code==='200'){
+           this.$message.success(msg);
+           this.dialogVisible=false;
+           this.getTableData(this.pageNum, this.pageSize);
+        }else{
+           this.$message.error(msg);
+           this.dialogVisible=false;
+           this.getTableData(this.pageNum, this.pageSize);
+        }
+        }else{
+          this.dialogVisible=false
+          return false
+        }
       },
      async changeStatus(index,row){
        if(row.isenable*1===0){
@@ -380,9 +451,11 @@
    & /deep/ .el-input__inner{
       height: 32px;
     }
-  .el-range-separator{
+    & /deep/ .el-range-separator{
     display: flex;
     align-items: center;
+  
   }
+   
   }
 </style>

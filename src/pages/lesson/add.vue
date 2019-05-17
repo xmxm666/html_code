@@ -187,12 +187,14 @@
       async submitForm() {
 				if(!this.timeRange){
 					this.$message.error('没有选择时间');
-				}
+        }
+        let nowDate=new Date()
+        let nowTime=convertUTCTimeToLocalTime(nowDate,'y-m-d')
         this.loading = true;
         const form = {
           ...this.form,
-          startDate: this.timeRange[0],
-          endDate: this.timeRange[1],
+          startDate: this.timeRange[0]||nowTime,
+          endDate: this.timeRange[1]||nowTime,
         };
 
         const {code, msg} = await this.addLesson(form);
@@ -208,7 +210,6 @@
       weekSelect(value){
         this.form.classList[0].week=value;
         this.selectWeek=getTowWeek(value);
-        console.log(getTowWeek(value))
 
       },
       selectSchool(value){
@@ -216,7 +217,6 @@
         this.getTeacherList({schoolId:value});
       },
       selectTeacher(value){
-        console.log(this.timeRange)
          this.form.courseTeacher=value;
       }
 			
@@ -235,7 +235,6 @@
       const courseId = this.$route.query.courseId;
       if (courseId) {
         const {data} = await this.getLessonDetails({courseId});
-        console.log(data)
         this.getTeacherList({schoolId:data.schoolId});
         this.schoolname=data.schoolName;
         this.teacherName=data.teacherName;

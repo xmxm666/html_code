@@ -1,12 +1,12 @@
 <template>
   <div id="List">
-    <header-bar legend="管理员列表">
+    <header-bar legend="投稿列表">
       <div slot="left">
-        <el-button type="primary" size="small"  style="margin-left: 20px" @click="$pushRoute('/admin/add')">
-          添加管理员
+        <el-button type="primary" size="small"  style="margin-left: 20px" @click="$pushRoute('/shop/teaching/add')">
+          添加投稿
         </el-button>
       </div>
-      <selectSchool :disabled='disabled' ></selectSchool>    
+      <selectSchool :disabled='disabled' ></selectSchool>
       <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
@@ -27,49 +27,71 @@
           show-overflow-tooltip
           width="120">
         </el-table-column>
-        <el-table-column
-          label="姓名"
-          align="center"
-          prop="name"
-          show-overflow-tooltip
-         >
-        </el-table-column>
-        <el-table-column
-          prop="phone"
-          label="手机号"
-          align="center"
-          width="200">
-        </el-table-column>
-        <el-table-column
-          label="单位"
+           <el-table-column
+          label="类别"
           align="center"
           prop="schoolName"
           show-overflow-tooltip
           >
         </el-table-column>
-        <!-- <el-table-column
-          label="审核状态"
+        <el-table-column
+          label="教材名"
+          align="center"
+          prop="booksName"
+          show-overflow-tooltip
+         >
+        </el-table-column>
+           <el-table-column
+          label="作者"
+          align="center"
+          prop="booksAuthor"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          prop="shopPrice"
+          label="价格"
+           align="center"
+          >
+        </el-table-column>
+          <el-table-column
+          prop="storeCount"
+          label="库存"
+           align="center"
+          >
+        </el-table-column>
+        <el-table-column
+          label="学校"
+          align="center"
+          prop="schoolName"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+         <el-table-column
+          label="上架时间"
+          align="center"
+          prop="onTime"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="是否上架"
           align="center">
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.status?`success`:`info`">{{scope.row.status?`通过`:`待审核`}}</el-tag>
+            <el-tag size="medium" :type="scope.row.status?`success`:`info`">{{scope.row.status?`上架`:`待上架`}}</el-tag>
           </template>
-        </el-table-column> -->
+        </el-table-column>
+        <el-table-column
+          label="是否包邮"
+          align="center">
+          <template slot-scope="scope">
+            <el-tag size="medium" :type="scope.row.status?`success`:`info`">{{scope.row.status?`包邮`:`不包邮`}}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="快捷操作"
-
+                          width="200"
                          align="center">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-               type='success'
-              v-if="scope.row.status===0"
-              @click="tableDataPass(scope.$index, scope.row)">通过
-            </el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              v-if="scope.row.status===0"
-              @click="tableDataRefuse(scope.$index, scope.row)">拒绝
-            </el-button>
             <el-button
               size="mini"
               @click="tableDataEdit(scope.$index, scope.row)">编辑
@@ -148,10 +170,6 @@
         });
         this.loading = false;
         return res;
-      },
-      tableDataPass(){
-      },
-      tableDataRefuse(){
       },
       tableDataEdit(index, row) {
         this.$router.push({path: `/admin/add`, query: {id: row.adminId}})

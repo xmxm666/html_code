@@ -8,8 +8,8 @@ import {schoolRouter} from "./school";
 import 'nprogress/nprogress.css'
 import NProgress from 'nprogress'
 import {commonRouter} from "./common";
-import {orderRouter} from './order';
 import {studentRouter} from './student';
+import {shopRouter} from './shop';
 
 
 Vue.use(Router);
@@ -28,9 +28,9 @@ const router = new Router({
         lessonRouter,
         teacherRouter,
         schoolRouter,
-        orderRouter,
         studentRouter,
-        adminRouter
+        adminRouter,
+        shopRouter
 
       ]
     }

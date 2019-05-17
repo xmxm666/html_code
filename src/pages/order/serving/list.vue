@@ -185,7 +185,6 @@
       },
       //删除
       productDeleteOrInvalid(index,row){
-        console.log(row)
         this.$confirm('确认删除这条记录？')
           .then(async _ => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏

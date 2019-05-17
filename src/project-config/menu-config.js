@@ -35,6 +35,10 @@ export const menuConfig = [{
       legend: "注销列表",
       path: "/student/logoutList",
     },
+    {
+      legend: "投稿列表",
+      path: "/student/submission/list",
+    },
   
 
   ]
@@ -82,6 +86,17 @@ export const menuConfig = [{
       legend: "政策法规",
       path: "/school/legal/list",
     },
+  ]
+},
+{
+  legend: "售卖管理",
+  icon: "el-icon-menu",
+  path: "/shop/teaching/list",
+  children: [
+    {
+      legend: "教材列表",
+      path: "/shop/teaching/list",
+    }
   ]
 },
 

@@ -1,6 +1,7 @@
 <template>
   <div id="selectSchool" >
    <el-select size="small" v-model="schoolId" :disabled="disabled" @change="selectSchool" placeholder="请选择学校">
+      <el-option label="全部" :value="0"></el-option>
         <el-option
           v-for="item in schoolData"
           :key="item.schoolId"
@@ -51,8 +52,9 @@ import { getBool } from '../utils';
        }
     },
    async created() {
+     if(this.schoolData.length===0||this.schoolData.length===undefined){
         await this.getSchoolList();
-
+     }
     }
   }
 </script>

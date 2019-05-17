@@ -8,7 +8,7 @@
   - 文件夹为 一级菜单
   - 二级菜单如果有多个页面 则以文件夹形式
   - 否则则以单文件形式
-- plugins 插件和混入对象
+<!-- - plugins 插件和混入对象 -->
 - project-config 项目配置
 - router 路由
   - 根路径路由 common.js

@@ -24,7 +24,6 @@ export default {
         sessionStorage.setItem("token", data.token);
         commit("SET_USER", data.administrator);
       }
-      console.log(res)
       return res;
     },
     initAdmin({commit}) {

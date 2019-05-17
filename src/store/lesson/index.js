@@ -26,7 +26,6 @@ export default {
       const {data} = await requestByPost("server/teacher/courseList", {
         ...params, 
       });
-      console.log(data)
       commit("SET_LESSON_LIST", data);
       return data
     },
@@ -85,6 +84,10 @@ export default {
       //下载课程
       async downLessonData({commit}, params) {
         return await requestByPost("server/fileDown/courseListDowm", params);
+      },
+      //设置所有时间
+      async settingTimer({commit}, params) {
+        return await requestByPost("apply/updatetime", params);
       },
      
   },

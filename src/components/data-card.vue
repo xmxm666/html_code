@@ -52,7 +52,6 @@
     methods: {},
     computed: {},
     created() {
-      console.log(this.data)
     }
   }
 </script>

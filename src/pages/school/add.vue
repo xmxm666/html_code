@@ -130,15 +130,11 @@
         _.pull(this.slideshow,file.response.url)
       },
       handlePictureCardPreview(file) {
-        console.log(1)
-        console.log(file)
-        console.log(this.dialogImageUrl)
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
       },
       handleADSuccess(res,file,fileList){
         this.slideshow.push(res.url)
-        console.log(this.slideshow)
       }
     
       

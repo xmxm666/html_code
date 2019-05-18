@@ -86,6 +86,10 @@ export const menuConfig = [{
       legend: "政策法规",
       path: "/school/legal/list",
     },
+    {
+      legend: "活动列表",
+      path: "/school/activity/list",
+    },
   ]
 },
 {

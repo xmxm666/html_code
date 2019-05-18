@@ -1,6 +1,6 @@
 <template>
   <div id="ADD">
-    <header-bar legend="添加/编辑教材"/>
+    <header-bar legend="添加/编辑投稿"/>
     <body-container>
       <el-form size="small" style="width: 600px" label-width="120px" label-position="left">
         <el-form-item label="学校名称" v-if="!disabled" >

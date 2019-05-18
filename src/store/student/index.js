@@ -5,7 +5,8 @@ export default {
   state: {
     studentList: {},
     leaveList:{},
-    logoutList:{}
+    logoutList:{},
+    tableDataList:[],
 
   },
   mutations: {
@@ -17,6 +18,9 @@ export default {
       },
       SET_LOGOUT_LIST_DATA(state, data) {
         state.logoutList = data;
+      },
+      SET_TABLE_LIST_DATA(state,data){
+        state.tableDataList=data
       }
   },
   actions: {
@@ -61,6 +65,15 @@ export default {
      //注销审核
      async passStudentLogout({commit}, params) {
       return await requestByPost("server/teacher/auditWithdraw", params);
+    },
+    //获取学员投稿列表
+    async getContributeList({commit}, params) {
+      const {data} = await requestByPost("server/admin/contributeList", params);
+      commit('SET_TABLE_LIST_DATA',data);
+    },
+    //修改投稿状态
+    async passStudentContribute({commit}, params) {
+      return await requestByPost("server/admin/auditContribute", params);
     },
   },
   modules: {}

@@ -150,7 +150,7 @@
           pageSize,
           type:'5',
           ...condition,
-           schoolId:localStorage.getItem('schoolId')
+           schoolId:localStorage.getItem('schoolId')==='null'?null:schoolId
         });
         this.table=res.data.list;
         this.total=res.data.total;

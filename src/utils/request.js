@@ -50,10 +50,10 @@ service.interceptors.response.use(
           }
         ).then(() => {
             sessionStorage.removeItem('token')
-            window.location.href=`http://120.27.16.130/manage/login`
+            window.location.href=`http://120.27.16.130`
         })
       }
-      return Promise.reject('error');
+      return response;
     } else {
       return response
     }

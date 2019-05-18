@@ -28,17 +28,25 @@
         </el-form-item>
         <el-form-item label="是否置顶">
           <el-switch v-model="ruleForm.istop" :active-value="1" :inactive-value="0"></el-switch>
+           <el-date-picker
+           :style="{marginLeft:'30px'}"
+           v-show="ruleForm.istop"
+            v-model="topTime"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="置顶开始日期"
+            end-placeholder="置顶结束日期">
+          </el-date-picker>
+          <span v-show="ruleForm.istop" :style="{color:'#999999'}">联盟资讯仅超级管理员可置顶</span>
         </el-form-item>
-        <el-form-item label="是否公开">
-          <el-switch v-model="ruleForm.ispublic" :active-value="1" :inactive-value="0"></el-switch>
-        </el-form-item>
-<!--        1-通知公告, 3-校园介绍, 4-联盟资讯, 5-政策法规-->
+<!--        1-通知公告, 3-校园介绍, 4-联盟资讯, 5-政策法规,6-内部规章制度-->
         <el-form-item label="文章类型" >
           <el-checkbox-group  v-model="type">
             <el-checkbox :label="1">通知公告</el-checkbox>
             <el-checkbox :label="3">校园介绍</el-checkbox>
             <el-checkbox :label="4">联盟资讯</el-checkbox>
             <el-checkbox :label="5">政策法规</el-checkbox>
+            <el-checkbox :label="6">内部规章制度</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
         <el-form-item label="文章正文">
@@ -64,7 +72,7 @@
   import bodyContainer from '../../../components/body-container'
   import richText from  '../../../components/rich-text'
   import {getBool} from '../../../utils'
-  import {backendBasePath} from "../../../project-config/base";
+  import {backendBasePath,ImgPath} from "../../../project-config/base";
 
 
   export default {
@@ -72,6 +80,7 @@
     data() {
       return {
         backendBasePath,
+        ImgPath,
         loading: false,
         isChange:false,
         schoolName:null,
@@ -79,6 +88,7 @@
         dialogVisible: false,
         disabled:false,
         imageUrl: '',
+        topTime:[],
         type:[],
         ruleForm: {
           schoolId:null,
@@ -87,6 +97,8 @@
           ispublic:false,
           content: '',
           url:null,
+          topdate:null,
+          topenddate:null,
         },
       }
     },
@@ -97,6 +109,8 @@
       ...mapActions('common',['getSchoolList']),
       async submitForm() {
         this.loading = true;
+        this.ruleForm.topdate=topTime[0];
+        this.ruleForm.topenddate=topTime[1];
           if(this.isChange){
            this.ruleForm.id= this.id;
           }
@@ -148,6 +162,8 @@
         this.ruleForm.ispublic=data.ispublic*1;
         this.ruleForm.content=data.content;
         this.ruleForm.url=data.url;
+        this.topTime.push(data.topdate)
+        this.topTime.push(data.topenddate)
         this.imageUrl=`http://120.27.16.130/${data.url}`
       }
         await this.getSchoolList();

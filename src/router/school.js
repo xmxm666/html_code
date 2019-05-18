@@ -85,6 +85,23 @@ export const schoolRouter = {
         }
       ]
     },
+    {
+      path: 'activity',
+      name: 'schoolActivity',
+      component: () => import('@/pages/school/activity/container'),
+      children:[
+        {
+          path: 'add',
+          name: 'schoolActivityAdd',
+          component:  () => import('@/pages/school/activity/add'),
+        },
+        {
+          path: 'list',
+          name: 'schoolActivityList',
+          component:  () => import('@/pages/school/activity/list'),
+        }
+      ]
+    },
   ]
 };
 

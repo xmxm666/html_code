@@ -1,12 +1,12 @@
 <template>
   <div id="List">
-    <header-bar legend="投稿列表">
+    <header-bar legend="活动列表">
       <div slot="left">
-        <el-button type="primary" size="small"  style="margin-left: 20px" @click="$pushRoute('/student/submission/add')">
-          添加投稿
+        <el-button type="primary" size="small" style="margin-left: 20px" @click="$pushRoute('/school/activity/add')">
+          添加活动
         </el-button>
       </div>
-      <selectSchool :disabled='disabled' ></selectSchool>
+        <selectSchool :disabled='disabled' ></selectSchool>  
       <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
@@ -21,57 +21,71 @@
         height="600px"
         style="width: 100%">
         <el-table-column
-          label="ID"
           align="center"
-          prop="cid"
-          show-overflow-tooltip
-          width="120">
+          prop="activitiesId"
+          label="ID"
+          width="80"/>
+
+        <el-table-column
+        show-overflow-tooltip
+          label="学校名称"
+          align="center"
+          prop="schoolName"
+        >
         </el-table-column>
-           <el-table-column
+
+        <el-table-column
+          show-overflow-tooltip
           label="标题"
           align="center"
-          prop="title"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="正文"
-          align="center"
-          prop="content"
-          show-overflow-tooltip
-         >
-        </el-table-column>
-           <el-table-column
-          label="时间"
-          align="center"
-          prop="createtime"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="审核状态"
-          align="center">
+        >
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.checkin*1===0?`success`:scope.row.checkin*1===1?'info':'danger'">
-              {{scope.row.checkin*1===0?`通过`:scope.row.checkin*1===1?'待审核':'拒绝'}}</el-tag>
+            {{scope.row.title}}
           </template>
         </el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          label="正文"
+          align="center"
+
+        >
+          <template slot-scope="scope">
+            {{scope.row.content}}
+          </template>
+        </el-table-column>
+        <el-table-column
+
+          label="开始时间"
+          align="center"
+
+        >
+          <template slot-scope="scope">
+            {{scope.row.startTime}}
+          </template>
+        </el-table-column>
+         <el-table-column
+
+          label="结束时间"
+          align="center"
+
+        >
+          <template slot-scope="scope">
+            {{scope.row.endTime}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="状态"
+
+          align="center">
+          <template slot-scope="scope">
+           <el-tag size="medium" :type="scope.row.type!=='1'?`success`:`success`">{{scope.row.type!=='1'?`本校活动`:`联盟活动`}}</el-tag>
+          </template>
+        </el-table-column>
+
         <el-table-column label="快捷操作"
-                          width="300"
+
                          align="center">
           <template slot-scope="scope">
-               <el-button
-              size="mini"
-              type="success"
-              v-if="scope.row.checkin*1===1"
-              @click="passStatus(scope.$index, scope.row,0)">通过
-            </el-button>
-               <el-button
-              size="mini"
-              type="danger"
-              v-if="scope.row.checkin*1===1"
-              @click="passStatus(scope.$index, scope.row,2)">拒绝
-            </el-button>
             <el-button
               size="mini"
               @click="tableDataEdit(scope.$index, scope.row)">编辑
@@ -81,6 +95,7 @@
               type="danger"
               @click="tableDataInvalid(scope.$index, scope.row)">删除
             </el-button>
+
           </template>
         </el-table-column>
       </el-table>
@@ -92,13 +107,13 @@
           :page-sizes="pageSizeOption"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="tableTotal">
+          :total="tableDataTotal">
         </el-pagination>
       </div>
     </body-container>
-    <el-dialog :visible.sync="imageDialogVisible">
+    <!-- <el-dialog :visible.sync="imageDialogVisible">
       <img width="100%" :src="imageDialogImageUrl" alt="我是一张图片">
-    </el-dialog>
+    </el-dialog> -->
   </div>
 
 </template>
@@ -110,106 +125,91 @@
   import {excludeEmpty,getBool} from "../../../utils";
   import RegionSelect from "../../../components/region-select";
   import selectSchool from "../../../components/select-school";
-  
 
   export default {
     name: "List",
     components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
+        table:[],
+        total:null,
+        dialogFormVisible:false,
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
-        loading: false,
-        multipleSelection: [],
-        categories: [],
-        pageNum: 1,
         disabled:false,
+        loading: false,
+        pageNum: 1,
         pageSize: 10,
-        pieChart: null,
-        barChart: null,
-        //根据是否失效来切换按钮
-        featureBtnState: 0,
         //默认搜索条件
         searchForm: {
-          role:1,
+          type:1,
+          schoolId: null,
         },
       }
     },
     methods: {
-      ...mapActions("common", ['getTeacherList','getSchoolList']),
-      ...mapActions("student", ['getContributeList','passStudentContribute']),
-
+      ...mapActions("school", ['delActivity','getActivityList']),
       async getTableData(pageNum, pageSize) {
         this.loading = true;
-        const res = await this.getContributeList({
-          ...this.searchForm,
+        const res = await this.getActivityList({
           pageNum,
           pageSize,
-          schoolId:localStorage.getItem('schoolId')
+          type:this.type,
+          ...this.searchForm,
+           schoolId:localStorage.getItem('schoolId')==='null'?null:schoolId
         });
+       console.log(res)
         this.loading = false;
-        return res;
       },
+      //详情
       tableDataEdit(index, row) {
-        this.$router.push({path: `/admin/add`, query: {id: row.adminId}})
+        this.$router.push({path: `/school/activity/add`, query: {id: row.activitiesId}})
       },
+      //删除
       tableDataInvalid(index, row) {
-        this.$confirm('确认删除该投稿？')
-          .then(async _ => {
+        this.$confirm('确认删除该条活动？')
+          .then( async () => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏
-            const {code} = await this.deleteTeacher({
-              adminId: row.adminId
+            const {code} = await this.delActivity({
+              activitiesId: row.activitiesId
             });
-            if (+code === 200) {
+            if (code === '200') {
               this.$message.success("删除成功!");
               this.getTableData(this.pageNum, this.pageSize);
             } else {
               this.$message.error("删除失败,请联系开发人员检查!");
             }
           })
-          .catch(_ => {
+          .catch(() => {
             this.$message("操作已取消");
           });
       },
-     async passStatus(index,row,type){
-      const {data,code,msg} =  await this.passStudentContribute({
-          ...row,
-          checkin:type,
-          })
-          if(code==='200'){
-                 this.$message.success("成功!");
-              this.getTableData(this.pageNum, this.pageSize);
-          }else{
-              this.$message.error("更改状态失败,请联系开发人员检查!");            
-          }
-      },
+      //一页多少个
       pageSizeChange(size) {
         this.pageSize = size;
         this.getTableData(this.pageNum, this.pageSize);
       },
+      //第几页
       pageNumChange(num) {
         this.pageNum = num;
         this.getTableData(this.pageNum, this.pageSize);
       },
-
     },
     computed: {
-      ...mapState("student", {
+      ...mapState("school", {
         tableData: state => state.tableDataList.list||[],
-        tableTotal: state => state.tableDataList.total|| 0
-      }),
-      ...mapState("platform", {
-        appPages: s => s.appPages
+        tableDataTotal: state => state.tableDataList.total||0,
+
       }),
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
-     await this.getTableData(this.pageNum, this.pageSize);
-         if(getBool()){
+      this.getTableData(this.pageNum, this.pageSize);
+        if(getBool()){
           this.disabled=true;
-          this.searchForm.schoolId=localStorage.getItem('schoolName');
         }
+
     }
   }
 </script>
@@ -219,6 +219,9 @@
     .c-form-pagination {
       text-align: center;
       margin-top: 30px;
+    }
+    .balance{
+      cursor: pointer;
     }
   }
 </style>

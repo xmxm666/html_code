@@ -14,7 +14,7 @@
         <el-form-item label="封面图片">
          <el-upload
             class="avatar-uploader"
-            :action="`${backendBasePath}/pic/uploadSchoolImages`"
+            :action="`${publishUrl}pic/uploadSchoolImages`"
             :show-file-list="false"
             name='file'
             :on-success="handleAvatarSuccess"
@@ -58,10 +58,12 @@
           <el-input v-model="ruleForm.url"></el-input>
         </el-form-item>
       </el-form>
+      
       <footer class="c-footer">
         <el-button size="small" type="primary" style="width: 120px" @click="submitForm">提交</el-button>
       </footer>
     </body-container>
+    
   </div>
 
 </template>
@@ -72,14 +74,15 @@
   import bodyContainer from '../../../components/body-container'
   import richText from  '../../../components/rich-text'
   import {getBool} from '../../../utils'
-  import {backendBasePath,ImgPath} from "../../../project-config/base";
-
+  import {backendBasePath,publishUrl,ImgPath} from "../../../project-config/base";
+  import { convertUTCTimeToLocalTime } from '../../../utils';
 
   export default {
     name: "ADD",
     data() {
       return {
         backendBasePath,
+        publishUrl,
         ImgPath,
         loading: false,
         isChange:false,
@@ -88,7 +91,7 @@
         dialogVisible: false,
         disabled:false,
         imageUrl: '',
-        topTime:[],
+        topTime:null,
         type:[],
         ruleForm: {
           schoolId:null,
@@ -96,7 +99,7 @@
           istop: false,
           ispublic:false,
           content: '',
-          url:null,
+          image:null,
           topdate:null,
           topenddate:null,
         },
@@ -109,15 +112,18 @@
       ...mapActions('common',['getSchoolList']),
       async submitForm() {
         this.loading = true;
-        this.ruleForm.topdate=topTime[0];
-        this.ruleForm.topenddate=topTime[1];
-          if(this.isChange){
-           this.ruleForm.id= this.id;
-          }
+        if(this.topTime){
+          this.ruleForm.topdate=convertUTCTimeToLocalTime(this.topTime[0],'y-m-d');
+          this.ruleForm.topenddate=convertUTCTimeToLocalTime(this.topTime[1],'y-m-d');
+        }
+        if(this.isChange){
+          this.ruleForm.id= this.id;
+        }
           const {data,code,msg} = await this.addArticle({
             ...this.ruleForm,
             type:this.type.join(',')
           });
+          console.log({data,code,msg})
           if(code==='200'){
             this.$message.success(msg);
             this.$router.back()
@@ -127,16 +133,17 @@
 				this.loading = false;
 
       },
-   handleAvatarSuccess(res, file) {
-        this.ruleForm.url=res.url
+      handleAvatarSuccess(res, file) {
+        this.ruleForm.image=res.url
         this.imageUrl = URL.createObjectURL(file.raw);
+        console.log(this.imageUrl)
       },
       beforeAvatarUpload(file) {
-        // const isJPG = file.type === 'image/jpeg';
-        // if (!isJPG) {
-        //   this.$message.error('上传头像图片只能是 JPG 格式!');
-        // }
-        // return isJPG;
+        const isJPG = file.type === 'image/jpeg';
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 JPG 格式!');
+        }
+        return isJPG;
       },
       selectSchool(value){
         this.ruleForm.schoolId=value;
@@ -154,6 +161,7 @@
         this.isChange=true;
         const {data} = await this.getArticlDetails({id});
         this.id=data.id;
+        console.log(data)
         this.schoolName=data.schoolName;
         this.ruleForm.schoolId=data.schoolId;
         this.type.push(data.type*1);
@@ -161,10 +169,17 @@
         this.ruleForm.istop=data.istop*1;
         this.ruleForm.ispublic=data.ispublic*1;
         this.ruleForm.content=data.content;
-        this.ruleForm.url=data.url;
-        this.topTime.push(data.topdate)
-        this.topTime.push(data.topenddate)
-        this.imageUrl=`http://120.27.16.130/${data.url}`
+        if(data.topdate!=null&&data.topenddate!=null){
+          console.log(111)
+          this.topTime = [];
+          this.topTime.push(data.topdate)
+          this.topTime.push(data.topenddate)
+          console.log(this.topTime)
+          // this.ruleForm.topdate = data.topdate;
+          // this.ruleForm.topenddate=data.top.topenddate
+        } 
+        this.ruleForm.image= (data.image != null)? data.image : ''
+        this.imageUrl= (data.image != null)? ImgPath+data.image : ''
       }
         await this.getSchoolList();
     }
@@ -175,7 +190,9 @@
 
 <style scoped lang="scss">
   @import "../../../assets/common";
-
+  .el-input__inner{
+    width: 432px;
+  }
   #ADD {
     .c-form {
       margin-left: 30px;

@@ -20,17 +20,20 @@
 </template>
 
 <script>
-  import {mapState, mapActions} from 'vuex'
+  // import {mapState, mapActions} from 'vuex'
   import _ from 'lodash'
-  import {menuConfig} from "../project-config/menu-config";
+  import {requestByGet} from "../utils/request";
+  import {menu} from "../project-config/menu-config";
 
   export default {
     data() {
       return {
         activeIndex: null,
         subActiveIndex: null,
+        menuConfig: []
       }
     },
+
     methods: {
       clickHandle(item, key) {
 
@@ -42,17 +45,55 @@
         this.$pushRoute(item.path)
         this.subActiveIndex = key;
       },
+      checkRole(roleMenu, currentMenu) {
+        var boolean = false;
+        roleMenu.forEach(aa => {
+          if(aa.legend === currentMenu.legend) {
+            boolean = true;
+            currentMenu.children = currentMenu.children.filter(currentCh => {
+              var booleanCh = false;
+               aa.children.forEach(roleCh => {
+                 if(roleCh.legend === currentCh.legend) booleanCh = true;
+               });
+               return booleanCh;
+            });
+          }
+        })
+        return boolean;
+      }
     },
     computed: {
-      menuConfig() {
-        return menuConfig
-      },
+
       subMenuConfig() {
-        const target = menuConfig[this.activeIndex];
+        const target = this.menuConfig[this.activeIndex];
         return target ? target.children : []
       }
     },
-    created() {
+    async created() {
+      let data = await requestByGet("server/role/allMenu");
+      // console.log(menu);
+      // console.log(data);
+      if (data.code === '200') {
+        if(data.data.length === 0) {
+          const role = localStorage.getItem('role');
+          if(role === "0" || role === "1") {
+            this.menuConfig = menu;
+          } else {
+            this.$message.error("您暂无权限，请联系管理员添加!");
+          }
+        }else {
+          var roleMenu = data.data;
+          const allMenu = menu.filter(m => {
+            return this.checkRole(roleMenu, m);
+          })
+          allMenu.forEach(currentValue => {
+            currentValue.path = currentValue.children[0].path;
+          })
+          this.menuConfig = allMenu;
+        }
+      } else {
+        this.$message.error(data.msg);
+      }
       this.activeIndex = _.findIndex(this.menuConfig, (item) => {
         return item.path && this.$route.path.includes(item.path)
       });

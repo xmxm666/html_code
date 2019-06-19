@@ -22,7 +22,7 @@ import { getBool } from '../utils';
 
     data() {
       return {
-          schoolId:null,
+          schoolId: null
       }
     },
     props:{
@@ -34,13 +34,14 @@ import { getBool } from '../utils';
     methods: {
          ...mapActions("common", ['getTeacherList','getSchoolList']),
          selectSchool(value){
+            if(value==0) value = '';
             localStorage.setItem('schoolId',value)
-         }
+         },
     },
     computed: {
-         ...mapState("common", {
+      ...mapState("common", {
         schoolData: state => state.schoolList||[],
-      }),
+      })
     },
     mounted(){
 
@@ -54,6 +55,7 @@ import { getBool } from '../utils';
    async created() {
      if(this.schoolData.length===0||this.schoolData.length===undefined){
         await this.getSchoolList();
+        console.log(this.schoolData)
      }
     }
   }

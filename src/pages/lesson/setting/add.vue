@@ -4,33 +4,35 @@
     <body-container v-loading="loading">
       <el-row type="flex">
         <el-form  class="c-form" inline size="small">
-           <el-form-item label="学校名称" v-if="!disabled" >
-        <!--<location-select style="margin-left: 30px"/>-->
-        <el-select   v-model="form.schoolName" placeholder="请选择添加到哪个学校" @change="selectSchool">
-          <el-option
-            v-for="item in schoolData"
-            :key="item.schoolId"
-            :label="item.schoolName"
-            :value="item.schoolName+'-'+item.schoolId">
-          </el-option>
-        </el-select>
-        </el-form-item>
+          <el-row type="flex">
+          <el-form-item label="学校名称">
+            <el-select size="small" v-model="school" :disabled="isChange" @change="selectSchool" placeholder="请选择学校">
+                <el-option
+                v-for="item in schoolData"
+                :key="item.schoolId"
+                :label="item.schoolName"
+                :value="item.schoolId+'-'+item.schoolName">
+                </el-option>
+            </el-select>
+          </el-form-item>
+        </el-row>
         </el-form>
       </el-row>
       <el-row type="flex">
         <el-form  class="c-form" inline size="small">
           <el-form-item label="课程名称" >
             <!--<location-select style="margin-left: 30px"/>-->
-            <el-select   v-model="form.courseName" placeholder="请选择课程名称" @change="selectTeacher">
+            <el-select   v-model="course" placeholder="请选择课程名称" @change="selectTeacher">
                <el-option
                 label="全部"
-                value="全部-0">
+                value="0-全部">
               </el-option>
               <el-option
+                v-if="form.schoolId!=null"
                 v-for="item in lessonData"
                 :key="item.courseId"
                 :label="item.courseName"
-                :value="item.courseName+'-'+item.courseId">
+                :value="item.courseId+'-'+item.courseName">
               </el-option>
             </el-select>
           </el-form-item>
@@ -44,9 +46,8 @@
               <el-form-item label="时间范围" class="c-form__item">
                 <div>
                   <el-date-picker
-                   value-format="yyyy-MM-dd"
                     v-model="timeRange"
-                    type="daterange"
+                    type="datetimerange"
                     range-separator="~"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期">
@@ -82,6 +83,25 @@
               </el-form-item>
             </el-col>
           </el-row>
+          <el-row type="flex" class="l-row">
+            <el-col :span="24">
+              <el-form-item label="课程数量" class="c-form__item">
+                <div>
+                  <el-input-number v-model="form.courseNum" :min="1" :max="100" label="描述文字"></el-input-number>
+                </div>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-row>
+      <el-row type="flex">
+        <el-form  class="c-form" inline size="small">
+          <el-form-item label="线下支付报名">
+            <el-radio-group v-model="form.offlineRegist" size="small">
+              <el-radio label="1">开启</el-radio>
+              <el-radio label="2">关闭</el-radio>
+            </el-radio-group>
+          </el-form-item>
         </el-form>
       </el-row>
       <footer class="c-footer">
@@ -100,7 +120,7 @@
   import RegionSelect from "../../../components/region-select";
   import ImgUpload from "../../../components/img-upload";
   import {WEEK} from "../../../enum";
-  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek, getBool} from '../../../utils'
+  import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek, getBool,splitTime} from '../../../utils'
   import _ from 'lodash'
 
 
@@ -113,9 +133,11 @@
         selectWeek:null,
         loading: false,
         timeRange:[],
-       
         people:[],
         disabled:false,
+        isChange:false,
+        school: null,
+        course: null,
         form: {
           schoolId:null,
           courseId:null,
@@ -129,6 +151,8 @@
           registCategoryFour:null,
           registCategoryFive:null,
           registCategorySix:null,
+          offlineRegist: null,
+          courseNum:null
         },
         options:['本单位职工','本单位职工家属','其他','本社区居民'],
         startTime: '',
@@ -139,9 +163,9 @@
       ...mapActions("lesson", ['addLessonSetting', 'getLessonSettingDetails','getLessonList','upDataLessonSetting']),
       ...mapActions('common',["getSchoolList"]),
       async submitForm() {
-      
+        let registstartTime;
+        let registendTime;
        this.people = _.compact(this.people);
-
         this.form.registCategoryOne=this.people[0]
         this.form.registCategoryTwo=this.people[1]
         this.form.registCategoryThree=this.people[2]
@@ -150,12 +174,15 @@
         this.form.registCategorySix=this.people[5]
 				if(!this.timeRange){
 					this.$message.error('没有选择时间');
+        }else{
+          registstartTime = convertUTCTimeToLocalTime(this.timeRange[0]) 
+          registendTime = convertUTCTimeToLocalTime(this.timeRange[1])
         }
         this.loading = true;
         const form = {
           ...this.form,
-          registstartTime: this.timeRange[0]+' 00:00:00',
-          registendTime: this.timeRange[1]+' 00:00:00',
+          registstartTime,
+          registendTime,
         };
          const id = this.$route.query.id;
           if (id) {
@@ -163,6 +190,7 @@
             ...form,
             id
           });
+          console.log({code, msg})
             if (code === '200') {
             this.$message.success("操作成功");
               this.$pushRoute("/page/lesson/setting/list");
@@ -185,16 +213,15 @@
         this.selectWeek=getTowWeek(value);
 
       },
-      selectSchool(value){
-        this.form.schoolName=value.split('-')[0];
-        this.form.schoolId=value.split('-')[1];
-        this.getLessonList({schoolId:this.form.schoolId});
+      async selectSchool(value){
+        await this.getLessonList({schoolId:value.split('-')[0]});
+        this.form.schoolId = value.split('-')[0];
+        this.form.schoolName = value.split('-')[1]
       },
       selectTeacher(value){
-        this.form.courseName=value.split('-')[0];
-        this.form.courseId=value.split('-')[1];
+        this.form.courseId = value.split('-')[0];
+        this.form.courseName = value.split('-')[1]
       }
-			
     },
     computed: {
   
@@ -210,33 +237,36 @@
       this.disabled=getBool()
       this.getLessonList({schoolId:localStorage.getItem('schoolId')});
       const id = this.$route.query.id;
+      await this.getSchoolList();
       if (id) {
         const {data} = await this.getLessonSettingDetails({id});
         const result = await this.getLessonList({schoolId:data.schoolId});
-      console.log(data)
+        console.log(data)
         this.teacherName=data.teacherName;
         this.timeRange=[];
-        this.timeRange.push(data.registstartTime.split(' ')[0]);
-        this.timeRange.push(data.registendTime.split(' ')[0]);
+        this.isChange=true;
+        this.timeRange.push(data.registstartTime);
+        this.timeRange.push(data.registendTime);
         this.people.push(data.registCategoryOne);
         this.people.push(data.registCategoryTwo);
         this.people.push(data.registCategoryThree);
         this.people.push(data.registCategoryFour);
         this.people.push(data.registCategoryFive);
         this.people.push(data.registCategorySix);
-
-       this.form = {
-            schoolId:data.schoolId,
-            courseId:data.courseId,
-            startAge:data.startAge,
-            endAge:data.endAge,
-            courseName:data.courseName,
-            schoolName:data.schoolName,
-         
-        }
-      }
-      if(!this.schoolData){
-        await this.getSchoolList();
+        this.form = {
+              schoolId:data.schoolId,
+              courseId:data.courseId,
+              startAge:data.startAge,
+              endAge:data.endAge,
+              courseName:data.courseName,
+              schoolName:data.schoolName,
+              offlineRegist:data.offlineRegist,
+              courseNum: data.courseNum
+          }
+        if(data.courseId!=null&&data.courseName!=null)
+          this.course = data.courseId+'-'+data.courseName
+        if(data.schoolId!=null&&data.schoolName!=null)
+          this.school = data.schoolId+'-'+data.schoolName;
       }
     }
   }

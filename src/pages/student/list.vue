@@ -12,7 +12,7 @@
         <el-option label="已通过" :value="0"></el-option>
       </el-select>
       <selectSchool :disabled='disabled' ></selectSchool>  
-      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -41,8 +41,10 @@
           align="center"
           prop="courseId"
           width="100">
-           <template slot-scope="scope">
-            <img-wrapper size="medium" :src="ImgPath+scope.row.image" style="{width:50px;height:50px;}"/>
+          <template slot-scope="scope" style="{width:150px;height:50px;}">
+            <div style="{width:150px;height:50px;}">
+              <img-wrapper v-show="scope.row.image!=null" size="medium" :src="ImgPath+scope.row.image" style="{width:50px;height:50px;}"/>
+            </div>
           </template>
         </el-table-column>
         <el-table-column
@@ -85,11 +87,19 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="状态"
+          label="审核状态"
           align="center"
           width="100">
           <template slot-scope="scope">
             <el-tag size="medium" :type="scope.row.checkin===1?`info`:`success`">{{scope.row.checkin===1?`待审核`:`正常`}}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="报名学校状态"
+          align="center"
+          width="100">
+          <template slot-scope="scope">
+            <el-tag size="medium" :type="scope.row.schoolId==null?`info`:`success`">{{scope.row.schoolId==null?`未报名`:`正常`}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="快捷操作"
@@ -99,12 +109,12 @@
                 <el-button
               size="mini"
               type="success"
-              @click="passBtn(scope.$index, scope.row)" v-if='scope.row.checkin===1'>通过
+              @click="passBtn(0, scope.row)" v-if='scope.row.checkin===1'>通过
             </el-button>
                 <el-button
               size="mini"
               type="danger"
-              @click="carouselMapInvalid(scope.$index, scope.row)" v-if='scope.row.checkin===1'>拒绝
+              @click="passBtn(2, scope.row)" v-if='scope.row.checkin===1'>拒绝
             </el-button>
             <el-button
               size="mini"
@@ -152,7 +162,7 @@
       return {
         ImgPath,
         imageDialogVisible: false,
-        imageDialogImageUrl: '',
+        imageDialogImageUrl: '', 
         value: '',
         disabled:false,
         loading: false,
@@ -190,15 +200,17 @@
           pageSize,
             schoolId:localStorage.getItem('schoolId')
         });
+        console.log(res)
         this.loading = false;
         return res;
       },
       carouselMapEdit(index, row) {
         this.$router.push({path: `/student/add`, query: {userId: row.userId,schoolId:row.schoolId}})
       },
-     async passBtn(index, row){
+     async passBtn(type, row){
+
        const {code,msg} = await this.passStudent({
-          checkin:0,
+          checkin:type,
           userId:row.userId
         })
         if(code==='200'){
@@ -231,7 +243,7 @@
           .then(async () => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏
             const {code} = await this.deleteStudent({
-              userItemId: row.userItemId,
+              userId: row.userId,
             });
             if (code === '200') {
               this.$message.success("删除成功!");
@@ -246,11 +258,16 @@
       },
       pageSizeChange(size) {
         this.pageSize = size;
-        this.getTableData(this.pageNum, this.pageSize);
+        const res = this.getTableData(this.pageNum, this.pageSize);
+        console.log(this.tableData)
       },
       pageNumChange(num) {
         this.pageNum = num;
-        this.getTableData(this.pageNum, this.pageSize);
+        const res = this.getTableData(this.pageNum, this.pageSize);
+        setTimeout(()=>{
+          console.log(this.tableData)
+        },1000)
+        
       },
 
 
@@ -269,7 +286,8 @@
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
-      await this.getTableData(this.pageNum, this.pageSize);
+      const res = await this.getTableData(this.pageNum, this.pageSize);
+      console.log(res)
          if(getBool()){
           this.disabled=true;
         }

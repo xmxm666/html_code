@@ -8,7 +8,7 @@
       </div>
                 <selectSchool :disabled='disabled' ></selectSchool>  
 
-      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>

@@ -4,7 +4,7 @@
     <body-container v-loading="loading">
       <el-row type="flex">
         <el-form  class="c-form" inline size="small">
-           <el-form-item label="学校名称" v-if="!disabled" >
+           <el-form-item label="学校名称">
         <!--<location-select style="margin-left: 30px"/>-->
         <el-select   v-model="schoolname"  placeholder="请选择添加到哪个学校" @change="selectSchool">
           <el-option
@@ -26,7 +26,8 @@
                 v-for="item in teacherData"
                 :key="item.adminId"
                 :label="item.name"
-                :value="item.adminId">
+                :value="item.adminId"
+                v-if="schoolname!=null">
               </el-option>
             </el-select>
           </el-form-item>
@@ -60,7 +61,7 @@
           </el-row>
           <el-row type="flex" class="l-row">
             <el-col :span="24">
-                     
+
               <el-form-item label="时间范围" class="c-form__item">
                 <div>
                   <el-date-picker
@@ -99,7 +100,7 @@
               </el-time-select>
               <el-time-select
                 placeholder="结束时间"
-               
+
                 v-model="form.classList[0].endTime"
                 :picker-options="{
                 start: '08:30',
@@ -112,7 +113,7 @@
             </el-col>
           </el-row>
            <el-row type="flex" class="l-row">
-            <el-col :span="24">   
+            <el-col :span="24">
               <el-form-item label="是否启用" class="c-form__item">
                 <div>
                  <el-switch
@@ -128,6 +129,9 @@
           </el-row>
         </el-form>
       </el-row>
+      <!-- <a href="javascript:;" class="file">导入表格
+        <input id="upload" type="file" @change="importfxx(this)"  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+      </a> -->
       <footer class="c-footer">
         <el-button size="small" type="primary" style="width: 120px" @click="submitForm">提交</el-button>
       </footer>
@@ -214,15 +218,15 @@
       },
       selectSchool(value){
         this.form.schoolId=value;
-        this.getTeacherList({schoolId:value});
+        this.getTeacherList({schoolId:value,role:2});
       },
       selectTeacher(value){
          this.form.courseTeacher=value;
       }
-			
+
     },
     computed: {
-  
+
       ...mapState('common',{
         schoolData:state=>state.schoolList||[],
         teacherData:state=>state.teacherList||[]
@@ -242,7 +246,7 @@
         this.timeRange.push(data.startDate);
         this.timeRange.push(data.endDate);
         this.selectWeek=getTowWeek(data.classList[0].week*1);
-    
+
 
        this.form = {
           courseName:data.courseName,
@@ -262,9 +266,7 @@
           ]
         }
       }
-      if(!this.schoolData){
         await this.getSchoolList();
-      }
     }
   }
 </script>
@@ -284,7 +286,7 @@
   #CarouselMap {
 .sing-time{
   padding: 0 20px;
-	
+
 }
     .c-form {
       margin-left: 30px;

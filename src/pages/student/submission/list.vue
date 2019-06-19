@@ -2,12 +2,10 @@
   <div id="List">
     <header-bar legend="投稿列表">
       <div slot="left">
-        <el-button type="primary" size="small"  style="margin-left: 20px" @click="$pushRoute('/student/submission/add')">
-          添加投稿
-        </el-button>
+        
       </div>
       <selectSchool :disabled='disabled' ></selectSchool>
-      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -27,12 +25,31 @@
           show-overflow-tooltip
           width="120">
         </el-table-column>
-           <el-table-column
+        <el-table-column
+          label="请求人"
+          align="center"
+          prop="userName"
+          show-overflow-tooltip
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="image"
+          label="封面"
+          align="center"
+          :formatter="formatterGenerator('dateTime')"
+          show-overflow-tooltip>
+          <template slot-scope="scope" style="{width:150px;height:50px;}">
+            <div style="{width:150px;height:50px;}">
+              <img-wrapper v-show="scope.row.image!=null" size="medium" :src='"http://prxopj1oi.bkt.clouddn.com/"+scope.row.image' style="{width:50px;height:50px;}"/>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column
           label="标题"
           align="center"
           prop="title"
           show-overflow-tooltip
-          >
+        >
         </el-table-column>
         <el-table-column
           label="正文"
@@ -48,29 +65,38 @@
           show-overflow-tooltip
           >
         </el-table-column>
+        </el-table-column>
+           <el-table-column
+          label="栏目类型"
+          align="center"
+          prop="typeName"
+          show-overflow-tooltip
+          >
+        </el-table-column>
         <el-table-column
           label="审核状态"
           align="center">
           <template slot-scope="scope">
             <el-tag size="medium" :type="scope.row.checkin*1===0?`success`:scope.row.checkin*1===1?'info':'danger'">
-              {{scope.row.checkin*1===0?`通过`:scope.row.checkin*1===1?'待审核':'拒绝'}}</el-tag>
+              {{scope.row.checkin==0?`已通过`:(scope.row.checkin==1)?'待审核':'已拒绝'}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="快捷操作"
                           width="300"
-                         align="center">
+                          align="right"
+                         >
           <template slot-scope="scope">
                <el-button
               size="mini"
               type="success"
               v-if="scope.row.checkin*1===1"
-              @click="passStatus(scope.$index, scope.row,0)">通过
+              @click="passStatus(scope.$index, scope.row,{type:0})">通过
             </el-button>
                <el-button
               size="mini"
               type="danger"
               v-if="scope.row.checkin*1===1"
-              @click="passStatus(scope.$index, scope.row,2)">拒绝
+              @click="passStatus(scope.$index, scope.row,{type:2})">拒绝
             </el-button>
             <el-button
               size="mini"
@@ -110,11 +136,11 @@
   import {excludeEmpty,getBool} from "../../../utils";
   import RegionSelect from "../../../components/region-select";
   import selectSchool from "../../../components/select-school";
-  
+  import imgWrapper from "../../../components/img-wrapper";
 
   export default {
     name: "List",
-    components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
+    components: {RegionSelect, BodyContainer, HeaderBar,selectSchool,imgWrapper},
     data() {
       return {
         imageDialogVisible: false,
@@ -138,7 +164,7 @@
     },
     methods: {
       ...mapActions("common", ['getTeacherList','getSchoolList']),
-      ...mapActions("student", ['getContributeList','passStudentContribute']),
+      ...mapActions("student", ['getContributeList','passStudentContribute','deleteStudentUp']),
 
       async getTableData(pageNum, pageSize) {
         this.loading = true;
@@ -152,37 +178,69 @@
         return res;
       },
       tableDataEdit(index, row) {
-        this.$router.push({path: `/admin/add`, query: {id: row.adminId}})
+        this.$router.push({path: `/student/submission/add`, query: {id: row.cid}})
       },
       tableDataInvalid(index, row) {
-        this.$confirm('确认删除该投稿？')
-          .then(async _ => {
+        this.$confirm('确认删除该投稿？',{
+          confirmButtonText: '通过',
+          cancelButtonText: '再想想'
+        }).then(async () => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏
-            const {code} = await this.deleteTeacher({
-              adminId: row.adminId
-            });
-            if (+code === 200) {
+            const {code} = await this.deleteStudentUp({cid:row.cid});
+            if (code == 200) {
               this.$message.success("删除成功!");
               this.getTableData(this.pageNum, this.pageSize);
             } else {
               this.$message.error("删除失败,请联系开发人员检查!");
             }
           })
-          .catch(_ => {
+          .catch(() => {
             this.$message("操作已取消");
           });
       },
-     async passStatus(index,row,type){
-      const {data,code,msg} =  await this.passStudentContribute({
-          ...row,
-          checkin:type,
-          })
-          if(code==='200'){
-                 this.$message.success("成功!");
+      passStatus(index,row,type){
+        console.log(type.type)
+        console.log(type==0)
+        if(type.type==2){
+          this.$prompt('请输入拒绝理由',{
+            confirmButtonText: '拒绝',
+            cancelButtonText: '再想想'
+          }).then(async ({ value }) => {
+            const {data,code,msg} = await this.passStudentContribute({cid:row.cid,rejectReason:value,checkin:2})
+            if(code==='200'){
+              this.$message({
+                type: 'success',
+                message: '修改成功'
+              });
               this.getTableData(this.pageNum, this.pageSize);
-          }else{
-              this.$message.error("更改状态失败,请联系开发人员检查!");            
-          }
+            }else this.$message.error("更改状态失败,请联系开发人员检查!");            
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消操作'
+            }); 
+          });      
+        }else if(type.type==0){
+          this.$confirm('是否通过该投稿?', {
+            confirmButtonText: '通过',
+            cancelButtonText: '再想想'
+          }).then(async () => {
+            const {data,code,msg} = await this.passStudentContribute({...row,checkin:0})
+            if(code==='200'){
+              this.$message({
+                type: 'success',
+                message: '操作成功!'
+              });
+              this.getTableData(this.pageNum, this.pageSize);
+            }else this.$message.error("更改状态失败,请联系开发人员检查!");
+          }).catch(() => {
+            console.log(111)
+            this.$message({
+              type: 'info',
+              message: '操作取消'
+            });          
+          });
+        }
       },
       pageSizeChange(size) {
         this.pageSize = size;

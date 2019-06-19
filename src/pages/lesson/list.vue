@@ -5,21 +5,21 @@
         <el-button type="primary" size="small" style="margin-left: 20px" @click="$pushRoute('/page/lesson/add')">
           添加课程
         </el-button>
-         <el-button type="primary" size="small" style="margin-left: 20px" @click="dialogVisible=true">
+        <el-button type="primary" size="small" style="margin-left: 20px" @click="dialogVisible=true">
           设置时间
         </el-button>
       </div>
-       <el-date-picker
-       :style="{marginRight:'10px'}"
-      v-model="timer"
-      type="daterange"
-      align="right"
-      unlink-panels
-      range-separator="至"
-      start-placeholder="开始日期"
-      end-placeholder="结束日期"
-      :picker-options="pickerOptions">
-    </el-date-picker>
+      <el-date-picker
+        :style="{marginRight:'10px'}"
+        v-model="timer"
+        type="daterange"
+        align="right"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        :picker-options="pickerOptions">
+      </el-date-picker>
       <el-select v-model="searchForm.isenable" placeholder="请选择状态" :style="{marginRight:'10px',height:'32px'}">
         <el-option
           v-for="item in lessonStatus"
@@ -28,10 +28,22 @@
           :value="item.value">
         </el-option>
       </el-select>
-       <el-input class="search-input" v-model="searchForm.search" placeholder="请输入课程名"></el-input>
-       <selectSchool :disabled='disabled' ></selectSchool>  
-      <el-button type="success" @click="getTableData(1,10)" size="small" :disabled="disabled"  style="width: 80px;margin-left: 20px">搜索 </el-button>
-      <!-- <el-button type="primary" @click="downData" size="small" :disabled="disabled"  style="width: 80px;margin-left: 20px">导出数据 </el-button> -->
+      <el-input class="search-input" v-model="searchForm.search" placeholder="请输入课程名"></el-input>
+      <selectSchool :disabled='disabled' ></selectSchool>  
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索 </el-button>
+      <el-button type="primary" @click="upData" size="small"  style="width: 80px;margin-left: 20px">导出数据 </el-button>
+      <el-upload
+          class="avatar-uploader"
+          :action="`${backendPath}/server/fileDown/courseListImport`"
+          :headers="headers"
+          :show-file-list="false"
+          :on-error="error"
+          name='file'
+          :on-success="handleAvatarSuccess2"
+          :before-upload="beforeAvatarUpload2">
+          <el-button type="primary" size="small"  style="width: 80px;margin-left: 20px">导入数据 </el-button>
+      </el-upload>
+
     </header-bar>
     <body-container>
       <el-table
@@ -54,8 +66,21 @@
          >
         </el-table-column>
         <el-table-column
+          prop="schoolName"
+          label="学校"
+          align="center"
+          width="170"
+         >
+        </el-table-column>
+        <el-table-column
           prop="courseName"
           label="课程名称"
+          align="center"
+         >
+        </el-table-column>
+        <el-table-column
+          prop="teacherName"
+          label="老师"
           align="center"
          >
         </el-table-column>
@@ -86,6 +111,15 @@
           show-overflow-tooltip>
           <template  slot-scope="scope">
             {{scope.row.coursePrice}}元
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="nowtotal"
+          label="可报名人数"
+          align="center"
+          >
+          <template  slot-scope="scope">
+            {{scope.row.nowtotal}}人
           </template>
         </el-table-column>
         <el-table-column
@@ -122,12 +156,13 @@
       </el-table>
       <div class="c-form-pagination">
         <div>
-         <el-button type="success" @click="changeStatusMore(1)">一键启用</el-button>
-         <el-button type="warning" @click="changeStatusMore(0)">一键停用</el-button>
-        <el-button type="danger" @click="deleteLessonMore">一键删除</el-button>
+          <el-button type="success" @click="changeStatusMore(1)">一键启用</el-button>
+          <el-button type="warning" @click="changeStatusMore(0)">一键停用</el-button>
+          <el-button type="danger" @click="deleteLessonMore">一键删除</el-button>
+          <el-button type="success" @click="downdowndown">下载课程模版</el-button>
         </div>
         <el-pagination
-        :style="{flex:1,display:'flex',justifyContent:'center'}"
+          :style="{flex:1,display:'flex',justifyContent:'center'}"
           @size-change="pageSizeChange"
           @current-change="pageNumChange"
           :current-page.sync="pageNum"
@@ -145,7 +180,7 @@
       width="30%"
       >
       <section :style="{marginBottom:'10px'}"><span>选择学校：</span>
-       <el-select v-model="schoolId" placeholder="请选择状态" :style="{marginRight:'10px',height:'32px'}">
+       <el-select v-model="schoolId" :disabled='disabled' placeholder="请选择状态" :style="{marginRight:'10px',height:'32px'}">
         <el-option
           v-for="item in schoolData"
           :key="item.schoolId"
@@ -185,21 +220,23 @@
   import {excludeEmpty,getBool,convertUTCTimeToLocalTime} from "../../utils";
   import RegionSelect from "../../components/region-select";
   import selectSchool from "../../components/select-school";
-
+  import {backendPath,ImgPath} from "../../project-config/base";
 
   export default {
     name: "CarouselMapList",
     components: {RegionSelect, BodyContainer, HeaderBar,selectSchool},
     data() {
       return {
-          dialogVisible: false,
+        dialogVisible: false,
         imageDialogVisible: false,
         imageDialogImageUrl: '',
         value: '',
-        //
+        backendPath,
         allTime:null,
         schoolId:null,
-        //
+        headers: {
+          'token' : sessionStorage.getItem("token")
+        },
         loading: false,
         multipleSelection: [],
         categories: [],
@@ -260,7 +297,7 @@
         this.imageDialogImageUrl = url;
         this.imageDialogVisible = true;
       },
-      ...mapActions("lesson", ['getLessonList','deleteLesson','changeLessonStatus','downLessonData','settingTimer']),
+      ...mapActions("lesson", ['getLessonList','deleteLesson','changeLessonStatus','settingTimer']),
       ...mapActions('common',['getSchoolList']),
       isPriceReduction(specifications) {
         return specifications.some((s) => s["isPriceReduction"]);
@@ -272,12 +309,17 @@
         }
         this.searchForm=excludeEmpty(this.searchForm)
         this.loading = true;
-        const res = await this.getLessonList({
-          ...this.searchForm,
-          pageNum,
-          pageSize,
-           schoolId:localStorage.getItem('schoolId')
-        });
+        let res;
+        console.log(pageNum!=undefined&&pageSize!=undefined)
+        if(pageNum!=undefined&&pageSize!=undefined){
+          res = await this.getLessonList({
+            ...this.searchForm,
+            pageNum,
+            pageSize,
+            schoolId:localStorage.getItem('schoolId')
+          });
+        }else
+          res = await this.getLessonList({...this.searchForm})
         this.loading = false;
         return res;
       },
@@ -358,23 +400,55 @@
       carouselMapEdit(index, row) {
         this.$router.push({path: `/page/lesson/add`, query: {courseId: row.courseId}})
       },
-     async downData(){
+     upData(){
          this.$confirm('是否下载该课表？')
           .then(async () => {
-            const {code} = await this.downLessonData({
-              ...this.searchForm
-            });
+            const {code,data} = await this.getTableData();
+            for(let i = 0;i < data.length; i++){
+              data[i].isenable = (data[i].isenable) == -1? '下架':(data[i].isenable == 0)? '未启用':(data[i].isenable == 1)? '启用':'';
+            }
             if (code === '200') {
+              require.ensure([], () => {
+                const {export_json_to_excel} = require('../../vendor/Export2Excel');
+                const tHeader = ['课程ID','学校名称','教师名称', '课程名称', '上课地址', '开课时间', '结束时间', '课程价钱', '状态'];
+                const filterVal = ['courseId','schoolName','teacherName', 'courseName', 'placeClass', 'startDate', 'endDate', 'coursePrice','isenable'];
+                const jsonData = this.formatJson(filterVal, data);
+                console.log(jsonData)
+                export_json_to_excel(tHeader, jsonData, '列表excel');
+              })
               this.$message.success("下载成功!");
               this.getTableData(this.pageNum, this.pageSize);
             } else {
               this.$message.error("下载失败,请联系开发人员检查!");
             }
           })
-          .catch(() => {
+          .catch(async () => {
+            console.log(this.tableData)
             this.$message("操作已取消");
           });
       },
+      handleAvatarSuccess2(res, file) {
+        if(res.code==200){
+          this.$message.success("上传成功");
+          this.getTableData(this.pageNum, this.pageSize);
+        } else this.$message.error(res.msg);
+      },
+      error(res){
+        this.$message.error(res.msg);
+      },
+      beforeAvatarUpload2(file) {
+        const isJPG = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'||'application/vnd.ms-excel';
+        if (!isJPG) {
+          this.$message.error('上传表格格式不符!');
+        }
+        return isJPG;
+      },
+      downdowndown(){
+        window.open('http://prxopj1oi.bkt.clouddn.com/%E8%AF%BE%E7%A8%8B%E6%A8%A1%E6%9D%BF2.xls')
+      },
+      formatJson(filterVal, jsonData) {
+				return jsonData.map(v => filterVal.map(j => v[j]))
+			},
       carouselMapInvalid(index, row) {
         this.$confirm('确认删除该课程？')
           .then(async () => {
@@ -418,7 +492,7 @@
     },
     async created() {
      await this.getTableData(this.pageNum, this.pageSize);
-
+      this.getSchoolList();
         if(getBool()){
           this.disabled=true;
         }

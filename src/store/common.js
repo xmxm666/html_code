@@ -27,6 +27,7 @@ export default {
         ...params,
       });
       commit("SET_SCHOOL_LIST", data);
+      return data
     },
     /***
      * 教师列表
@@ -35,7 +36,9 @@ export default {
       const {data} = await requestByPost("server/admin/adminList", {
         ...params,
       });
+      console.log({data})
       commit("SET_TEACHER_LIST", data);
+      return data
     },
     //管理员列表
     async getAdminList({commit}, params) {

@@ -7,7 +7,7 @@
         </el-button>
       </div>
         <selectSchool :disabled='disabled' ></selectSchool>  
-      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -143,7 +143,6 @@
         pageSize: 10,
         //默认搜索条件
         searchForm: {
-          type:1,
           schoolId: null,
         },
       }
@@ -155,9 +154,8 @@
         const res = await this.getActivityList({
           pageNum,
           pageSize,
-          type:this.type,
           ...this.searchForm,
-           schoolId:localStorage.getItem('schoolId')==='null'?null:schoolId
+          //  schoolId:localStorage.getItem('schoolId')==='null'?null:schoolId
         });
        console.log(res)
         this.loading = false;

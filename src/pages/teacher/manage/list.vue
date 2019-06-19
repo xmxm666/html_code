@@ -6,8 +6,8 @@
           添加教师
         </el-button>
       </div>
-      <selectSchool :disabled='disabled' ></selectSchool>    
-      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
+      <selectSchool :disabled='disabled'></selectSchool>    
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -54,9 +54,7 @@
             <el-tag size="medium" :type="scope.row.status?`success`:`info`">{{scope.row.status?`通过`:`待审核`}}</el-tag>
           </template>
         </el-table-column> -->
-        <el-table-column label="快捷操作"
-
-                         align="center">
+        <el-table-column label="快捷操作" align="center">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -139,7 +137,6 @@
       ...mapActions("teacher", ['deleteTeacher']),
 
       async getTableData(pageNum, pageSize) {
-
         this.loading = true;
         const res = await this.getTeacherList({
           ...this.searchForm,
@@ -157,7 +154,7 @@
         console.log('该功能未完善')
       },
       tableDataEdit(index, row) {
-        this.$router.push({path: `/teacher/manage/add`, query: {id: row.adminId}})
+        this.$router.push({path: `/teacher/manage/add`, query: {id: row.adminId,schoolId:row.schoolId}})
       },
       tableDataInvalid(index, row) {
         this.$confirm('确认删除该教师？')
@@ -201,11 +198,11 @@
       pageSizeOption: _ => [10, 20, 30, 40],
     },
     async created() {
-     await this.getTableData(this.pageNum, this.pageSize);
-         if(getBool()){
-          this.disabled=true;
-          this.searchForm.schoolId=localStorage.getItem('schoolName');
-        }
+      await this.getTableData(this.pageNum, this.pageSize);
+      if(getBool()){
+        this.disabled=true;
+        this.searchForm.schoolId=localStorage.getItem('schoolName');
+      }
     }
   }
 </script>

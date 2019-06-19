@@ -12,9 +12,17 @@
         <!-- Login Form -->
         <div>
           <input type="text" id="login" v-model="form.phone" class="fadeIn second" name="login"
-                 :placeholder="userNameFocus?'':'请输入账号'" @focus="userNameFocus=true" @blur="userNameFocus=false">
+                 :placeholder="userNameFocus?'':'请输入账号'" @focus="userNameFocus(true)" @blur="userNameFocus(false)">
           <input type="password" id="password" v-model="form.password" class="fadeIn third" name="login"
                  :placeholder="passWordFocus?'':'请输入密码'" @focus="passWordFocus=true" @blur="passWordFocus=false">
+<!--          <el-select v-model="form.schoolId" placeholder="请选择学校" style="display:block;width: 382px;margin:10px auto;" class="fadeIn fourth">
+            <el-option
+              v-for="item in options"
+              :key="item.schoolId"
+              :label="item.schoolName"
+              :value="item.schoolId">
+            </el-option>
+          </el-select>-->
           <input type="submit" @click.prevent="submitLogin" class="fadeIn fourth" value="登录">
         </div>
 
@@ -35,21 +43,23 @@
     name: "loginContainer",
     data() {
       return {
-        userNameFocus: false,
         passWordFocus: false,
+        options:[],
         form: {
           phone: "",
-          password: ""
+          password: "",
+          schoolId: null
         }
       }
     },
-    computed: {},
+    computed: {
+
+    },
     methods: {
-      ...mapActions("administrator", ["login"]),
+      ...mapActions("administrator", ["login","findSchoolByPhone"]),
       async submitLogin() {
         const {code,data, msg} = await this.login({...this.form});
         if (code === '200') {
-
           if(data){
             localStorage.setItem('schoolId',data.admin.schoolId)
             localStorage.setItem('schoolName',data.schoolName);
@@ -58,7 +68,6 @@
             if(data.admin.role===0){
               localStorage.setItem('schoolId',0)
             }
-
           }
           this.$message({
             message: '登录成功!',
@@ -72,6 +81,24 @@
           this.$message.error(msg);
         }
 
+      },
+      async selectSchool() {
+        const {data} = await this.findSchoolByPhone({phone:this.form.phone});
+        this.options = data;
+      },
+
+      userNameFocus(isFocus) {
+/*        this.options = [];
+        if(!isFocus) {
+          const phone = this.form.phone;
+          const myreg=/^[1][3,4,5,7,8][0-9]{9}$/;
+          if (!myreg.test(phone)) {
+            this.$message.error("请输入正确的手机号");
+            return false;
+          }
+          console.log(phone);
+          this.selectSchool();
+        }*/
       }
     },
     watch: {},

@@ -5,11 +5,15 @@ export default {
   state: {
     lessonList: [],
     lessonSettingList:[],
-    lessonSpecialList:[]
+    lessonSpecialList:[],
+    goodlessonList:[]
   },
   mutations: {
     SET_LESSON_LIST(state, data) {
       state.lessonList = data;
+    },
+    SET_LESSON_LISTgood(state, data) {
+      state.goodlessonList = data;
     },
     SET_LESSON_SETTING_LIST(state, data) {
       state.lessonSettingList = data;
@@ -23,16 +27,30 @@ export default {
      * 课程列表
      */
     async getLessonList({commit}, params) {
-      const {data} = await requestByPost("server/teacher/courseList", {
+      const {data,code} = await requestByPost("server/teacher/courseList", {
         ...params, 
       });
       commit("SET_LESSON_LIST", data);
-      return data
+      console.log({data,code})
+      return {data,code}
+    },
+    //精品课程列表
+    async getgoodlesson({commit}, params){
+      const {data,code} = await requestByPost("server/fineCourse/fineCourseList", {
+        ...params, 
+      });
+      commit("SET_LESSON_LISTgood", data);
+      return {data,code}
     },
     //删除课程
-   async deleteLesson({commit}, params) {
+    async deleteLesson({commit}, params) {
       return await requestByPost("server/teacher/deleteCourse", params);
     },
+    //删除精品课程
+    async deleteGoodLesson({commit}, params) {
+      return await requestByGet("server/fineCourse/deleteFineCourse", params);
+    },
+    
     //移除课程
     
     async removeLesson({commit}, params) {
@@ -50,16 +68,17 @@ export default {
         ...params,
       });
     },
+    
     //获取课程设置
     async getLessonSettingList({commit}, params) {
-      const {data} = await requestByGet("regist/show", params);
+      const {data} = await requestByGet("regist/show", params); 
       commit("SET_LESSON_SETTING_LIST", data);
     },
      //获取特别设置
      async showSpecial({commit}, params) {
-      const {data} = await requestByGet("regist/showspecial", params);
+      const {data,code,msg} = await requestByGet("regist/showspecial", params);
       commit("SET_SPECIAL_LESSON_SETTING_LIST", data);
-
+      return {data,code,msg}
     },
     //获取课程设置详情
     async getLessonSettingDetails({commit}, params) {
@@ -89,6 +108,6 @@ export default {
       async settingTimer({commit}, params) {
         return await requestByPost("apply/updatetime", params);
       },
-     
+      
   },
 }

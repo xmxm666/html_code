@@ -8,6 +8,9 @@ import order from './order'
 import common from './common'
 import school from './school'
 import student from './student';
+import trade from './trade'
+import shop from './shop'
+import role from './role'
 import {requestByGet, requestByPost} from "../utils/request";
 
 Vue.use(Vuex);
@@ -33,6 +36,6 @@ export default new Vuex.Store({
   },
   plugins: [],
   modules: {
-    administrator, lesson, platform, teacher,order,common,school,student
+    administrator, lesson, platform, teacher,order,common,school,student,trade,shop,role
   }
 })

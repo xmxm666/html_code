@@ -45,6 +45,7 @@ export function splitTime(str,type){
     str=str+''
     const year = str.split('.')[0].split('T')[0];
     const time = str.split('.')[0].split('T')[1];
+    console.log(type==='y-m-d')
     if(type==='y-m-d'){
       return year;
     }else {
@@ -211,17 +212,17 @@ export function convertUTCTimeToLocalTime(UTCDateString,type) {
   let year = date2.getFullYear();
   let mon = formatFunc(date2.getMonth() + 1);
   let day = formatFunc(date2.getDate());
-  let hour = date2.getHours();
-  let noon = hour >= 12 ? 'PM' : 'AM';
-    hour = hour>=12?hour-12:hour;
-    hour = formatFunc(hour);
+  let hour = formatFunc(date2.getHours());
+  let noon = "00";
+    // hour = hour>=12?hour-12:hour;
+    // hour = formatFunc(hour);
   let min = formatFunc(date2.getMinutes());
   if(type==='y-m-d'){
     let dateStr = year+'-'+mon+'-'+day;
     return dateStr;
 
   }else {
-    let dateStr = year+'-'+mon+'-'+day+' '+noon +' '+hour+':'+min;
+    let dateStr = year+'-'+mon+'-'+day+' '+hour+':'+min+':'+noon;
     return dateStr;
   }
   }
@@ -269,9 +270,9 @@ export function convertUTCTimeToLocalTime(UTCDateString,type) {
       }
   }
   export function getBool(){
-    if(localStorage.getItem('role')==='1'){
-      return true
-    }else{
+    if(localStorage.getItem('role')==='0'){
       return false
+    }else{
+      return true
     }
   }

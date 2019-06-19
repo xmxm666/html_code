@@ -36,19 +36,17 @@
             <el-input v-model="ruleForm.place"></el-input>
         </el-form-item>
         <el-form-item label="参与人数">
-             <el-input-number v-model="ruleForm.number"  :min="1" :max="99" label="描述文字"></el-input-number>
+             <el-input-number v-model="ruleForm.number"  :min="1" :max="1000" label="描述文字"></el-input-number>
         </el-form-item>
-         <el-form-item label="人员类别" :style='{marginLift:0}' class="c-form__item select-people">
-                <div>
-                     <el-select v-model="people" multiple placeholder="请选择">
-                      <el-option
-                        v-for="item in options"
-                        :key="item"
-                        :label="item"
-                        :value="item">
-                      </el-option>
-                    </el-select>
-                </div>
+         <el-form-item label="人员类别">
+            <el-select v-model="people" multiple placeholder="请选择" filterable allow-create default-first-option>
+            <el-option
+              v-for="item in options"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
         </el-form-item>
             <el-form-item label="活动起止时间">
              <el-date-picker
@@ -108,6 +106,7 @@ import { convertUTCTimeToLocalTime } from '../../../utils';
         startTime:[],
         registStartTime:[],
         options:['教师','学员','管理员'],
+        
         people:[],
         ruleForm: {
           id:null,
@@ -135,8 +134,8 @@ import { convertUTCTimeToLocalTime } from '../../../utils';
       ...mapActions('common',['getSchoolList']),
       async submitForm() {
         if(this.startTime.length!==0){
-        this.ruleForm.startTime=convertUTCTimeToLocalTime(this.startTime[0],'y-m-d')
-        this.ruleForm.endTime=convertUTCTimeToLocalTime(this.startTime[1],'y-m-d')
+          this.ruleForm.startTime=convertUTCTimeToLocalTime(this.startTime[0],'y-m-d')
+          this.ruleForm.endTime=convertUTCTimeToLocalTime(this.startTime[1],'y-m-d')
         }
         if(this.registStartTime.length!==0){
          this.ruleForm.registStartTime=convertUTCTimeToLocalTime(this.registStartTime[0],'y-m-d')
@@ -194,7 +193,9 @@ import { convertUTCTimeToLocalTime } from '../../../utils';
         this.registStartTime.push(data.registStartTime)
         this.registStartTime.push(data.registEndTime)
         this.ruleForm.type=data.type*1;
-        this.people=data.category.split(',')
+        console.log(data.category)
+        if(data.category){this.people=data.category.split(',')}
+        
 
         console.log(this.ruleForm.title)
       }

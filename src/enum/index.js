@@ -10,6 +10,9 @@ export const retirementStatusColumns=['未退休','已退休'];
 //学员分类
 export const studentClassificationColumns=['教师','本单位职工','本单位职工家属','本社区居民','其他','管理员'];
 
+//在校任职
+export const schoolJobStatusColumns=['宣传员','物资管理员'];
+
 
 export const WEEK =[
   {text:'星期一',value:11},

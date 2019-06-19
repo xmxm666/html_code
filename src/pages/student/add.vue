@@ -133,13 +133,13 @@
                <el-cascader
 
                     size="large"
-              
+
                     :options="options"
-              
+
                     v-model="selectedOptions"
-              
+
                     @change="handleChange">
-              
+
                   </el-cascader>
               </el-form-item>
             </el-col>
@@ -163,10 +163,15 @@
           </el-row>
              <el-row type="flex" :gutter="40" class="l-row">
             <el-col :span="24">
-              <el-form-item label="在校任职" class="c-form__item">
-                <template>
-                   <el-input placeholder="请输入" v-model="form.schoolJob"/>
-                </template>
+              <el-form-item label="在校任职">
+                <el-select v-model="form.schoolJob" placeholder="请选择">
+                  <el-option
+                    v-for="item in schoolJobStatusColumns"
+                    :key="item"
+                    :label="item"
+                    :value="item">
+                  </el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -223,7 +228,7 @@
   import BodyContainer from "../../components/body-container";
   import RegionSelect from "../../components/region-select";
   import ImgUpload from "../../components/img-upload";
-  import {WEEK,politicalStatusColumns,educationalLevelColumns,retirementStatusColumns,studentClassificationColumns} from "../../enum";
+  import {WEEK,politicalStatusColumns,educationalLevelColumns,retirementStatusColumns,studentClassificationColumns, schoolJobStatusColumns} from "../../enum";
   import {convertUTCTimeToLocalTime,excludeEmpty,getWeek, getTowWeek,getBool} from '../../utils'
   import { provinceAndCityData, regionData, provinceAndCityDataPlus, regionDataPlus, CodeToText, TextToCode } from 'element-china-area-data'
   import _ from 'lodash'
@@ -238,6 +243,7 @@
         politicalStatusColumns,
         educationalLevelColumns,
         retirementStatusColumns,
+        schoolJobStatusColumns,
         studentClassificationColumns,  //以上枚举
         options: regionData,
         selectWeek:null,
@@ -276,7 +282,7 @@
     methods: {
       ...mapActions("student", ['addStudent', 'getStudentDetails']),
       ...mapActions('common',["getTeacherList","getSchoolList"]),
-      async submitForm() {       
+      async submitForm() {
         this.loading = true;
         const form = {
           ...this.form,
@@ -307,10 +313,10 @@
       selectTeacher(value){
          this.form.courseTeacher=value;
       }
-			
+
     },
     computed: {
-  
+
       ...mapState('common',{
         schoolData:state=>state.schoolList||[],
         teacherData:state=>state.teacherList||[]
@@ -324,13 +330,13 @@
       const schoolId = this.$route.query.schoolId;
       if (userId) {
       const {data} = await this.getStudentDetails({userId,schoolId})
-
+      console.log(data)
        this.form = data;
        this.schoolname=data.schoolName
        if(data.area){
         this.selectedOptions=data.areaId.split('-');
         this.area=data.area
-       }      
+       }
       }
       if(!this.schoolData){
         await this.getSchoolList();
@@ -354,7 +360,7 @@
   #CarouselMap {
 .sing-time{
   padding: 0 20px;
-	
+
 }
     .c-form {
       margin-left: 30px;

@@ -14,17 +14,20 @@
           </el-option>
         </el-select>
         </el-form-item>
-         <el-form-item label="管理员ID"  class="recruitmentTitle" v-if="isChange">
+        <el-form-item label="管理员ID"  class="recruitmentTitle" v-if="isChange">
           <el-input placeholder="请输入" :disabled='true' v-model="form.adminId"/>
         </el-form-item>
-         <el-form-item label="管理员名称" class="recruitmentTitle">
+        <el-form-item label="管理员名称" class="recruitmentTitle">
           <el-input placeholder="请输入" v-model="form.name"/>
         </el-form-item>
-        <el-form-item label="账号" class="recruitmentTitle">
+        <el-form-item label="手机号" class="recruitmentTitle">
           <el-input placeholder="请输入" v-model="form.phone"/>
         </el-form-item>
-         <el-form-item label="密码" class="recruitmentTitle">
+        <el-form-item label="密码" class="recruitmentTitle">
           <el-input placeholder="请输入" v-model="form.password"/>
+        </el-form-item>
+        <el-form-item label="职称、职级" class="recruitmentTitle">
+          <el-input placeholder="请输入" v-model="form.post"/>
         </el-form-item>
       </el-form>
       <footer class="c-footer">
@@ -56,12 +59,12 @@
         isEdit: false,
         schoolName:null,
         form: {
-        adminId:null,
-        name:null,
-        phone:null,
-        schoolId:null,
+          adminId:null,
+          name:null,
+          phone:null,
+          schoolId:null,
+          post: null
         },
-
       }
     },
     methods: {
@@ -104,24 +107,26 @@
       },
     },
     computed: {
-        ...mapState('common',{
+      ...mapState('common',{
         schoolData:state=>state.schoolList||[],
         teacherData:state=>state.teacherList||[]
       }),
     },
     async created() {
-            this.disabled=getBool()
+      this.disabled=getBool()
       const id = this.$route.query.id;
-       await this.getSchoolList()
+      await this.getSchoolList()
       if (id) {
         this.isChange=true;
-        const {data} = await this.getTeacherDetails({adminId:id});
+        const {data} = await this.getTeacherDetails({adminId:id,schoolId: this.$route.query.schoolId});
         this.form.name=data.name;
         this.form.phone=data.phone;
         this.form.schoolId=data.schoolId;
         this.form.adminId=data.adminId;
-        this.schoolName=data.schoolName;
+        this.form.post=data.post
 
+        ;
+        this.schoolName=data.schoolName;
       }
     }
   }

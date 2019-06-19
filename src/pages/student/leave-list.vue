@@ -155,6 +155,7 @@
           pageSize,
           schoolId:localStorage.getItem('schoolId')
         });
+        console.log()
         this.loading = false;
         return res;
       },

@@ -8,7 +8,7 @@
       </div>
                  <selectSchool :disabled='disabled' ></selectSchool>  
 
-      <el-button type="success" @click="getTableData(1,10)" size="small" :disabled='disabled' style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container :style="{minHeight:0}">
@@ -24,11 +24,12 @@
           type="selection"
           width="55">
         </el-table-column>
-              <el-table-column
+        <el-table-column
           label="学校名称"
           align="center"
+          width="200"
         >
-        <template  slot-scope="scope">
+          <template  slot-scope="scope">
             {{scope.row.schoolName?scope.row.schoolName:'暂无信息'}}
           </template>
         </el-table-column>
@@ -40,7 +41,15 @@
             {{scope.row.courseName?scope.row.courseName:'暂无信息'}}
           </template>
         </el-table-column>
-  
+        <el-table-column
+          label="课程数量"
+          align="center"
+          width="80"
+        >
+          <template  slot-scope="scope">
+            {{scope.row.courseNum}}门
+          </template>
+        </el-table-column>
         <el-table-column
           prop="registstartTime"
           label="开始时间"
@@ -59,6 +68,7 @@
           prop="startAge"
           label="最小年龄"
           align="center"
+          width="80"
           :formatter="formatterGenerator('dateTime')"
           show-overflow-tooltip>
           <template  slot-scope="scope">
@@ -69,6 +79,7 @@
           prop="coursePrice"
           label="最大年龄"
           align="center"
+          width="80"
           show-overflow-tooltip>
           <template  slot-scope="scope">
             {{scope.row.endAge?scope.row.endAge+'岁':'暂无信息'}}
@@ -85,11 +96,19 @@
           </template>
         </el-table-column>
         <el-table-column
+          label="线下报名"
+          align="center"
+          width="100">
+          <template slot-scope="scope">
+            <el-tag size="medium" :type="scope.row.offlineRegist==2?`danger`:`success`">{{scope.row.offlineRegist==2?`未开启`:`开启`}}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
           label="状态"
           align="center"
           width="100">
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.invalid?`danger`:`success`">{{scope.row.invalid?`失效`:`正常`}}</el-tag>
+            <el-tag size="medium" :type="scope.row.invalid?`danger`:`warning`">{{scope.row.invalid?`失效`:`正常`}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="快捷操作"
@@ -131,14 +150,14 @@
       </div>
                  <selectSchool :disabled='disabled' ></selectSchool>  
 
-      <el-button type="success" @click="getTableData(1,10)" size="small" :disabled='disabled' style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container :style="{minHeight:0}">
       <el-table
         stripe
         ref="multipleTable"
-        :data="specialLessonList"
+        :data="all==true?specialLessonList:specialList"
         tooltip-effect="dark"
         border
         v-loading="loading"
@@ -150,6 +169,7 @@
               <el-table-column
           label="学校名称"
           align="center"
+          width="200"
         >
         <template  slot-scope="scope">
             {{scope.row.schoolName?scope.row.schoolName:'暂无信息'}}
@@ -163,7 +183,15 @@
             {{scope.row.courseName?scope.row.courseName:'暂无信息'}}
           </template>
         </el-table-column>
-  
+        <el-table-column
+          label="课程数量"
+          align="center"
+          width="80"
+        >
+          <template  slot-scope="scope">
+            {{scope.row.courseNum}}门
+          </template>
+        </el-table-column>
         <el-table-column
           prop="registstartTime"
           label="开始时间"
@@ -182,6 +210,7 @@
           prop="startAge"
           label="最小年龄"
           align="center"
+          width="80"
           :formatter="formatterGenerator('dateTime')"
           show-overflow-tooltip>
           <template  slot-scope="scope">
@@ -192,6 +221,7 @@
           prop="coursePrice"
           label="最大年龄"
           align="center"
+          width="80"
           show-overflow-tooltip>
           <template  slot-scope="scope">
             {{scope.row.endAge?scope.row.endAge+'岁':'暂无信息'}}
@@ -208,11 +238,19 @@
           </template>
         </el-table-column>
         <el-table-column
+          label="线下报名"
+          align="center"
+          width="100">
+          <template slot-scope="scope">
+            <el-tag size="medium" :type="scope.row.offlineRegist==2?`danger`:`success`">{{scope.row.offlineRegist==2?`未开启`:`开启`}}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
           label="状态"
           align="center"
           width="100">
           <template slot-scope="scope">
-            <el-tag size="medium" :type="scope.row.invalid?`danger`:`success`">{{scope.row.invalid?`失效`:`正常`}}</el-tag>
+            <el-tag size="medium" :type="scope.row.invalid?`danger`:`warning`">{{scope.row.invalid?`失效`:`正常`}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="快捷操作"
@@ -239,7 +277,7 @@
           :page-sizes="pageSizeOption"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="specialLessonListTotal">
+          :total="all==true?specialLessonListTotal:specialTotal">
         </el-pagination>
       </div>
     </body-container>
@@ -255,7 +293,7 @@
   import {excludeEmpty,getTrue,getBool} from "../../../utils";
   import RegionSelect from "../../../components/region-select";
   import selectSchool from "../../../components/select-school";
-  import _ from 'lodash'
+  import _ from 'lodash';
 
   export default {
     name: "CarouselMapList",
@@ -277,9 +315,7 @@
         //根据是否失效来切换按钮
         featureBtnState: 0,
         //默认搜索条件
-        searchForm: {
-          schoolId: null,
-        },
+        schoolId: localStorage.getItem('schoolId'),
       }
     },
     methods: {
@@ -296,10 +332,9 @@
         this.searchForm=excludeEmpty(this.searchForm)
         this.loading = true;
         const res = await this.getLessonSettingList({
-          ...this.searchForm,
+          schoolId: (localStorage.getItem('schoolId')=='null')?'':localStorage.getItem('schoolId'),
           pageNum,
           pageSize,
-           schoolId:localStorage.getItem('schoolId')||'2'
         });
         this.loading = false;
         return res;
@@ -343,7 +378,9 @@
             });
             if (code === '200') {
               this.$message.success("移除成功!");
+              this.all = true;
               this.getTableData(this.pageNum, this.pageSize);
+
             } else {
               this.$message.error("移除失败,请联系开发人员检查!");
             }
@@ -362,21 +399,20 @@
         this.pageNum = num;
         this.getTableData(this.pageNum, this.pageSize);
       },
-      //
-    //  async getSpecialData(){
-    //      this.searchForm=excludeEmpty(this.searchForm)
-    //     this.loading = true;
-    //     const res = await this.showSpecial({
-    //       ...this.searchForm,
-    //       pageNum,
-    //       pageSize,
-    //        schoolId:localStorage.getItem('schoolId')||'2'
-    //     });
-    //     this.loading = false;
-    //     return res;
-    //   }
-
-
+      
+     async getSpecialData(){
+         this.searchForm=excludeEmpty(this.searchForm)
+        this.loading = true;
+        const res = await this.showSpecial({
+          ...this.searchForm,
+          pageNum:this.pageNum,
+          pageSize:this.pageSize,
+           schoolId:localStorage.getItem('schoolId')||'2'
+        });
+        console.log(res)
+        this.loading = false;
+        return res;
+      }
     },
     computed: {
       ...mapState("lesson", {
@@ -404,15 +440,9 @@
       specialLessonList(){
         return _.compact(this.tableData.map(item=>{
           if(this.all){
-           if(item.courseId!==0){
-            return item
+            if(item.courseId!==0) return item
+              else if(item.registPriority==='1') return item
           }
-          }else{
-            if(item.registPriority==='1'){
-              return item
-            }
-          }
-        
         }))
       },
        specialLessonListTotal(){
@@ -422,6 +452,10 @@
     },
     async created() {
       await this.getTableData(this.pageNum, this.pageSize);
+      console.log(this.tableData)
+      console.log(this.allLessonList)
+      console.log(this.specialLessonList)
+      console.log(getBool())
         if(getBool()){
           this.disabled=true;
         }

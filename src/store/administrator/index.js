@@ -26,6 +26,9 @@ export default {
       }
       return res;
     },
+    async findSchoolByPhone({commit}, params) {
+      return await requestByGet("server/admin/findSchoolByPhone", params);
+    },
     initAdmin({commit}) {
       const token = sessionStorage.getItem("token");
       if (token) {

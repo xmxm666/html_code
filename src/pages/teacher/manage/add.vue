@@ -14,14 +14,17 @@
           </el-option>
         </el-select>
         </el-form-item>
-         <el-form-item label="教师ID"  class="recruitmentTitle" v-if="isChange">
+        <el-form-item label="教师ID"  class="recruitmentTitle" v-if="isChange">
           <el-input placeholder="请输入" :disabled='true' v-model="form.adminId"/>
         </el-form-item>
-        <el-form-item label="教师名" class="recruitmentTitle">
+        <el-form-item label="教师名称" class="recruitmentTitle">
           <el-input placeholder="请输入" v-model="form.name"/>
         </el-form-item>
-         <el-form-item label="教师手机号" class="recruitmentTitle">
+        <el-form-item label="教师手机号" class="recruitmentTitle">
           <el-input placeholder="请输入" v-model="form.phone"/>
+        </el-form-item>
+        <el-form-item label="职称、职级" class="recruitmentTitle">
+          <el-input placeholder="请输入" v-model="form.post"/>
         </el-form-item>
       </el-form>
       <footer class="c-footer">
@@ -53,12 +56,12 @@
         isEdit: false,
         schoolName:null,
         form: {
-        adminId:null,
-        name:null,
-        phone:null,
-        schoolId:null,
-        },
-
+          adminId:null,
+          name:null,
+          phone:null,
+          post: null,
+          schoolId:null,
+        }
       }
     },
     methods: {
@@ -66,59 +69,58 @@
       ...mapActions('common',["getTeacherList","getSchoolList"]),
       async submitForm() {
 				this.loading = true;
-
         if(this.isChange){
-           const {data,code,msg} = await this.upDataTeacher({
-           ...this.form,
-           role:2
-         })
+          const {data,code,msg} = await this.upDataTeacher({
+            ...this.form,
+            role:2
+          })
           if (code === '200') {
-          this.$message.success(msg);
-          this.$pushRoute("/teacher/manage/list")
-        } else {
-          this.$message.error(msg)
-        }
+            this.$message.success(msg);
+            this.$pushRoute("/teacher/manage/list")
+          } else {
+            this.$message.error(msg)
+          }
         }else{
           const {data,code,msg} = await this.addTeacher({
            ...this.form,
            role:2
          })
           if (code === '200') {
-          this.$message.success(msg);
-          this.$pushRoute("/teacher/manage/list")
-        } else {
-          this.$message.error(msg)
-        }
+            this.$message.success(msg);
+            this.$pushRoute("/teacher/manage/list")
+          } else {
+            this.$message.error(msg)
+          }
         }
 				this.loading = false;
-
       },
       toString(val){
         return val.toString()
       },
-        selectSchool(value){
+      selectSchool(value){
         this.form.schoolId=value;
       },
     },
     computed: {
-        ...mapState('common',{
+      ...mapState('common',{
         schoolData:state=>state.schoolList||[],
         teacherData:state=>state.teacherList||[]
       }),
     },
     async created() {
-            this.disabled=getBool()
+      this.disabled=getBool()
       const id = this.$route.query.id;
-       await this.getSchoolList()
+      await this.getSchoolList()
       if (id) {
         this.isChange=true;
-        const {data} = await this.getTeacherDetails({adminId:id});
+        const {data} = await this.getTeacherDetails({adminId:id,schoolId:this.$route.query.schoolId});
+        console.log({data})
         this.form.name=data.name;
         this.form.phone=data.phone;
         this.form.schoolId=data.schoolId;
         this.form.adminId=data.adminId;
         this.schoolName=data.schoolName;
-
+        this.form.post = data.post;
       }
     }
   }

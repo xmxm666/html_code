@@ -1,4 +1,4 @@
-export const menuConfig = [{
+export const menu = [{
   legend: "首页",
   path: "/home/view",
   icon: "el-icon-menu",
@@ -11,12 +11,16 @@ export const menuConfig = [{
     {
     legend: "课程列表",
     path: "/page/lesson/list",
-  },
-  {
-    legend: "报名条件设置",
-    path: "/page/lesson/setting/list",
-  },
-    ]
+    },
+    {
+      legend: "报名条件设置",
+      path: "/page/lesson/setting/list",
+    },
+    {
+      legend: "精品课程",
+      path: "/page/lesson/goodlesson/list",
+    }
+  ]
 },
 {
   legend: "学员管理",
@@ -39,12 +43,30 @@ export const menuConfig = [{
       legend: "投稿列表",
       path: "/student/submission/list",
     },
-  
+    {
+      legend: "学员展示",
+      path: "/student/goodsubmission/list",
+    }
 
   ]
 },
-  {
-  legend: "人员管理",
+{
+  legend: "报名管理",
+  icon: "el-icon-menu",
+  path: "/trade/school/list",
+  children: [
+    {
+      legend: "学校缴费信息",
+      path: "/trade/school/list",
+    },
+    {
+      legend: "学员缴费列表",
+      path: "/trade/student/list",
+    }
+  ]
+},
+{
+  legend: "教师管理",
   icon: "el-icon-menu",
   path: "/teacher/manage/list",
   children: [
@@ -53,9 +75,9 @@ export const menuConfig = [{
       path: "/teacher/manage/list",
     },
     {
-      legend: "管理员列表",
-      path: "/admin/list",
-    },
+      legend: "教师风采",
+      path: "/goodteacher/list",
+    }
   ]
 },
  {
@@ -89,7 +111,7 @@ export const menuConfig = [{
     {
       legend: "活动列表",
       path: "/school/activity/list",
-    },
+    }
   ]
 },
 {
@@ -100,6 +122,21 @@ export const menuConfig = [{
     {
       legend: "教材列表",
       path: "/shop/teaching/list",
+    }
+  ]
+},
+{
+  legend: "权限管理",
+  icon: "el-icon-menu",
+  path: "/permission/role/list",
+  children: [
+    {
+      legend: "角色列表",
+      path: "/permission/role/list",
+    },
+    {
+      legend: "人员列表",
+      path: "/permission/admin/list",
     }
   ]
 },

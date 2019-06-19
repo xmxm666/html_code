@@ -145,13 +145,14 @@
       if (id) {
         this.isChange=true;
         const {data} = await this.getSchoolDetails({schoolId:id});
+        console.log(data.url)
         this.form.schoolName=data.schoolName;
         this.form.longitude=data.longitude;
         this.form.latitude=data.latitude;
         this.form.schoolId=data.schoolId;
         this.form.image=data.image;
         this.slideshow=[]
-        this.imageUrl=`http://120.27.16.130/${data.image}`
+        this.imageUrl = (data.image != null)? `http://120.27.16.130/${data.image}` : ''
       }
     }
   }

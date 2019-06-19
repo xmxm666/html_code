@@ -51,9 +51,29 @@ export const studentRouter = {
                 meta:{title:'投稿列表'},
                 name: 'SubmissionList',
                 component:  () => import('@/pages/student/submission/list'),
-              },
+              }
             ]
           },
+          {
+            path: 'goodsubmission',
+            meta:{title:'投稿'},
+            name: 'goodSubmission',
+            component:  () => import('@/pages/container'),
+            children: [
+              {
+                path: 'add',
+                meta:{title:'添加学员展示'},
+                name: 'goodSubmissionAdd',
+                component: () => import('@/pages/student/goodstudent/add'),
+              },
+               {
+                path: 'list',
+                meta:{title:'学员展示列表'},
+                name: 'goodSubmissionList',
+                component:  () => import('@/pages/student/goodstudent/list'),
+              } 
+            ]
+          }
         ]
       }
     ]

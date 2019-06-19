@@ -6,9 +6,9 @@
           添加联盟资讯
         </el-button>
       </div>
-                <selectSchool :disabled='disabled' ></selectSchool>  
+                <selectSchool :disabled='disabled' ></selectSchool>
 
-      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -43,16 +43,14 @@
             {{scope.row.title}}
           </template>
         </el-table-column>
-        <el-table-column
+        <!--<el-table-column
           show-overflow-tooltip
           label="正文"
-          align="center"
-
-        >
+          align="center">
           <template slot-scope="scope">
             {{scope.row.content}}
           </template>
-        </el-table-column>
+        </el-table-column>-->
         <el-table-column
 
           label="创建时间"

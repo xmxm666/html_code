@@ -7,7 +7,7 @@
         </el-button>
       </div>
       <selectSchool :disabled='disabled' ></selectSchool>    
-      <el-button type="success" @click="getTableData(1,10)" :disabled='disabled' size="small" style="width: 80px;margin-left: 20px">搜索
+      <el-button type="success" @click="getTableData(1,10)" size="small" style="width: 80px;margin-left: 20px">搜索
       </el-button>
     </header-bar>
     <body-container>
@@ -154,14 +154,15 @@
       tableDataRefuse(){
       },
       tableDataEdit(index, row) {
-        this.$router.push({path: `/admin/add`, query: {id: row.adminId}})
+        this.$router.push({path: `/admin/add`, query: {id: row.adminId,schoolId: row.schoolId}})
       },
       tableDataInvalid(index, row) {
         this.$confirm('确认删除该管理员？')
           .then(async _ => {
             //如果row有值就是表格中的按钮 否则就是下面的工具栏
             const {code} = await this.deleteTeacher({
-              adminId: row.adminId
+              adminId: row.adminId,
+              schoolId: row.schoolId
             });
             if (+code === 200) {
               this.$message.success("删除成功!");

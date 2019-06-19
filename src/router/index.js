@@ -3,13 +3,15 @@ import Router from 'vue-router'
 import Index from '@/pages/index'
 import {homeRouter} from "./home";
 import {lessonRouter} from "./lesson";
-import {teacherRouter,adminRouter} from "./teacher";
+import {teacherRouter,adminRouter,goodRouter} from "./teacher";
 import {schoolRouter} from "./school";
 import 'nprogress/nprogress.css'
 import NProgress from 'nprogress'
 import {commonRouter} from "./common";
 import {studentRouter} from './student';
 import {shopRouter} from './shop';
+import {tradeRouter} from './trade'
+import {permissionRouter} from './permission'
 
 
 Vue.use(Router);
@@ -21,7 +23,6 @@ const router = new Router({
     ...commonRouter,
     {
       path: '/',
-      name: 'Index',
       component: Index,
       children: [
         homeRouter,
@@ -30,8 +31,10 @@ const router = new Router({
         schoolRouter,
         studentRouter,
         adminRouter,
-        shopRouter
-
+        shopRouter,
+        tradeRouter,
+        goodRouter,
+        permissionRouter
       ]
     }
   ]

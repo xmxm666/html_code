@@ -37,6 +37,23 @@ export const lessonRouter = {
             },
           ]
         },
+        {
+          path: 'goodlesson',
+          name: 'goodlesson',
+          component:  () => import('@/pages/lesson/goodlesson/container'),
+          children:[
+            {
+              path: 'list',
+              name: 'goodlessonList',
+              component:  () => import('@/pages/lesson/goodlesson/list'),
+            },
+            {
+              path: 'add',
+              name: 'goodlessonAdd',
+              component:  () => import('@/pages/lesson/goodlesson/add'),
+            },
+          ]
+        },
       ]
     }
   ]
